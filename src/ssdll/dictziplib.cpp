@@ -113,9 +113,9 @@
 #define DICT_DZIP       3
 
 #ifdef _WIN32
-int DictData::read_header(const std::wstring &fname, int computeCRC) {
+int DictData::read_header(const std::wstring &fname, bool computeCRC) {
 #else
-int DictData::read_header(const std::string &fname, int computeCRC) {
+int DictData::read_header(const std::string &fname, bool computeCRC) {
 #endif
 	FILE          *str;
 	int           id1, id2, si1, si2;
@@ -328,7 +328,7 @@ bool DictData::open(const std::string& fname, int computeCRC) {
        return false;
    }
 
-   this->start=mapfile.begin();
+   this->start = mapfile.begin();
    this->end = this->start + this->size;
 
    for (size_t j = 0; j < DICT_CACHE_SIZE; j++) {

@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #endif
 
+#include <cstdio>
 #include <fcntl.h>
 #include <string>
 
@@ -42,7 +43,7 @@ bool MapFile::open(const std::wstring &filepath, unsigned long fileSize) {
     }
 #else
 bool MapFile::open(const std::string &filepath, unsigned long fileSize) {
-    if ((m_mmap_fd = open(filepath.c_str(), "rb")) < 0) {
+    if ((m_mmap_fd = fopen(filepath.c_str(), "rb")) < 0) {
         return false;
     }
 #endif

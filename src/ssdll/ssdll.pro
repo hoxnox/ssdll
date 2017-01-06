@@ -16,7 +16,9 @@ SOURCES += lookupdictionary.cpp \
     dictionarymetadata.cpp \
     dictziplib.cpp \
     dictionarybase.cpp \
-    utils.cpp
+    utils.cpp \
+    worddata.cpp \
+    indexfile.cpp
 
 HEADERS += lookupdictionary.h\
         ssdll_global.h \
@@ -24,7 +26,9 @@ HEADERS += lookupdictionary.h\
     dictziplib.hpp \
     mapfile.hpp \
     dictionarybase.h \
-    utils.h
+    utils.h \
+    worddata.h \
+    indexfile.h
 
 INCLUDEPATH += ../
 

@@ -6,14 +6,14 @@
 #include <string>
 #include <cstdio>
 #include "dictziplib.hpp"
+#include "worddata.h"
 
 struct CacheItem {
     uint32_t m_Offset;
-    std::string m_Data;
+    std::vector<char> m_Data;
 };
 
-const int WORDDATA_CACHE_NUM = 10;
-const int INVALID_INDEX=-100;
+#define WORDDATA_CACHE_NUM 10
 
 class DictionaryBase {
 public:
@@ -31,15 +31,10 @@ public:
     DictionaryBase &operator=(const DictionaryBase&) = delete;
 
 public:
-    bool containSearchData() const {
-        bool result = m_SameTypeSequence.empty() ||
-                (m_SameTypeSequence.find_first_of("mlgxty") != std::string::npos);
-        return result;
-    }
+    void readWordData(uint32_t idxitemOffset, uint32_t idxitemSize, std::vector<char> &wordData);
 
-public:
-    std::string getWordData(uint32_t idxitemOffset, uint32_t idxitemSize);
-    bool hasMatchInData(const std::vector<std::string> &SearchWords, uint32_t idxitemOffset, uint32_t idxitemSize, std::vector &placeHolderForData);
+private:
+    bool tryGetCached(uint32_t idxitemOffset, std::vector<char> &data);
 
 protected:
     std::string m_SameTypeSequence;

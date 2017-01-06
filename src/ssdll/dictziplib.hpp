@@ -22,18 +22,18 @@ public:
 
 public:
 #ifdef _WIN32
-    bool open(const std::wstring& filename, int computeCRC);
+    bool open(const std::wstring& filename, bool computeCRC);
 #else
-    bool open(const std::string& filename, int computeCRC);
+    bool open(const std::string& filename, bool computeCRC);
 #endif
 	void close();
 	void read(char *buffer, unsigned long start, unsigned long size);
 
 private:
 #ifdef _WIN32
-    int read_header(const std::wstring &filename, int computeCRC);
+    int read_header(const std::wstring &filename, bool computeCRC);
 #else
-    int read_header(const std::string &filename, int computeCRC);
+    int read_header(const std::string &filename, bool computeCRC);
 #endif
 
 private:
