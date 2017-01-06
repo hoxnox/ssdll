@@ -9,14 +9,7 @@
 
 struct CacheItem {
     uint32_t m_Offset;
-    char *m_Data;
-    //write code here to make it inline
-    CacheItem() { m_Data = nullptr; }
-    virtual ~CacheItem() {
-        if (m_Data != nullptr) {
-            free(m_Data);
-        }
-    }
+    std::string m_Data;
 };
 
 const int WORDDATA_CACHE_NUM = 10;
@@ -45,8 +38,8 @@ public:
     }
 
 public:
-    char *GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize);
-    bool SearchData(std::vector<std::string> &SearchWords, uint32_t idxitemOffset, uint32_t idxitemSize, char *originData);
+    std::string getWordData(uint32_t idxitemOffset, uint32_t idxitemSize);
+    bool hasMatchInData(const std::vector<std::string> &SearchWords, uint32_t idxitemOffset, uint32_t idxitemSize, std::vector &placeHolderForData);
 
 protected:
     std::string m_SameTypeSequence;

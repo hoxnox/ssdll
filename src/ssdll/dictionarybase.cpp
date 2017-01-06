@@ -3,9 +3,9 @@
 #include <cstring>
 #include "utils.h"
 
-char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) {
+std::string DictionaryBase::getWordData(uint32_t idxitemOffset, uint32_t idxitemSize) {
     for (int i = 0; i < WORDDATA_CACHE_NUM; i++) {
-        if (m_Cache[i].m_Data && (m_Cache[i].m_Offset == idxitemOffset)) {
+        if ((!m_Cache[i].m_Data.empty()) && (m_Cache[i].m_Offset == idxitemOffset)) {
             return m_Cache[i].m_Data;
         }
     }
@@ -14,26 +14,26 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
         fseek(m_DictFile, idxitemOffset, SEEK_SET);
     }
 
-    char *data;
+    std::vector<char> wordData;
 
     if (!m_SameTypeSequence.empty()) {
-        std::vector<char> dataPlaceholder(idxitemSize, ' ');
-        char *origin_data = &dataPlaceholder[0];
+        std::vector<char> dataPlaceholder(idxitemSize, '\0');
+        char *originData = &dataPlaceholder[0];
 
         if (m_DictFile) {
-            const size_t nitems = fread(origin_data, idxitemSize, 1, m_DictFile);
+            const size_t nitems = fread(originData, idxitemSize, 1, m_DictFile);
             assert(nitems == 1);
         } else {
-            m_DictDzFile->read(origin_data, idxitemOffset, idxitemSize);
+            m_DictDzFile->read(originData, idxitemOffset, idxitemSize);
         }
 
-        uint32_t data_size;
-        int sametypesequence_len = m_SameTypeSequence.length();
+        uint32_t dataSize;
+        int sametypesequenceLength = m_SameTypeSequence.length();
         //there have sametypesequence_len char being omitted.
-        data_size = idxitemSize + sizeof(uint32_t) + sametypesequence_len;
+        dataSize = idxitemSize + sizeof(uint32_t) + sametypesequenceLength;
         //if the last item's size is determined by the end up '\0',then +=sizeof(gchar);
         //if the last item's size is determined by the head guint32 type data,then +=sizeof(guint32);
-        switch (m_SameTypeSequence[sametypesequence_len-1]) {
+        switch (m_SameTypeSequence[sametypesequenceLength-1]) {
         case 'm':
         case 't':
         case 'y':
@@ -41,26 +41,27 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
         case 'g':
         case 'x':
         case 'k':
-            data_size += sizeof(char);
+            dataSize += sizeof(char);
             break;
         case 'W':
         case 'P':
-            data_size += sizeof(uint32_t);
+            dataSize += sizeof(uint32_t);
             break;
         default:
-            if (ascii_isupper(m_SameTypeSequence[sametypesequence_len-1]))
-                data_size += sizeof(uint32_t);
+            if (ascii_isupper(m_SameTypeSequence[sametypesequenceLength-1]))
+                dataSize += sizeof(uint32_t);
             else
-                data_size += sizeof(char);
+                dataSize += sizeof(char);
             break;
         }
-        data = (char *)malloc(data_size);
+        wordData.resize(dataSize, '\0');
+        char *data = &wordData[0];
         char *p1,*p2;
         p1 = data + sizeof(uint32_t);
-        p2 = origin_data;
+        p2 = originData;
         uint32_t sec_size;
         //copy the head items.
-        for (int i=0; i<sametypesequence_len-1; i++) {
+        for (int i=0; i<sametypesequenceLength-1; i++) {
             *p1=m_SameTypeSequence[i];
             p1+=sizeof(char);
             switch (m_SameTypeSequence[i]) {
@@ -98,11 +99,11 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
             }
         }
         //calculate the last item 's size.
-        sec_size = idxitemSize - (p2 - origin_data);
-        *p1 = m_SameTypeSequence[sametypesequence_len-1];
+        sec_size = idxitemSize - (p2 - originData);
+        *p1 = m_SameTypeSequence[sametypesequenceLength-1];
         p1 += sizeof(char);
 
-        switch (m_SameTypeSequence[sametypesequence_len-1]) {
+        switch (m_SameTypeSequence[sametypesequenceLength-1]) {
         case 'm':
         case 't':
         case 'y':
@@ -121,7 +122,7 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
             memcpy(p1, p2, sec_size);
             break;
         default:
-            if (ascii_isupper(m_SameTypeSequence[sametypesequence_len-1])) {
+            if (ascii_isupper(m_SameTypeSequence[sametypesequenceLength-1])) {
                 set_uint32(p1, sec_size);
                 p1 += sizeof(uint32_t);
                 memcpy(p1, p2, sec_size);
@@ -132,9 +133,10 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
             }
             break;
         }
-        set_uint32(data, data_size);
+        set_uint32(data, dataSize);
     } else {
-        data = (char*)malloc(idxitemSize + sizeof(uint32_t));
+        wordData.resize(idxitemSize + sizeof(uint32_t));
+        char *data = &wordData[0];
         if (m_DictFile) {
             const size_t nitems = fread(data+sizeof(uint32_t), idxitemSize, 1, m_DictFile);
             assert(nitems == 1);
@@ -144,9 +146,7 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
         set_uint32(data, idxitemSize+sizeof(uint32_t));
     }
 
-    free(m_Cache[m_CurrCacheIndex].m_Data);
-
-    m_Cache[m_CurrCacheIndex].m_Data = data;
+    m_Cache[m_CurrCacheIndex].m_Data = std::string(wordData.begin(), wordData.end());
     m_Cache[m_CurrCacheIndex].m_Offset = idxitemOffset;
     m_CurrCacheIndex++;
 
@@ -154,28 +154,33 @@ char* DictionaryBase::GetWordData(uint32_t idxitemOffset, uint32_t idxitemSize) 
         m_CurrCacheIndex = 0;
     }
 
-    return data;
+    return wordData;
 }
 
-bool DictionaryBase::SearchData(std::vector<std::string> &SearchWords, uint32_t idxitemOffset, uint32_t idxitemSize, char *originData) {
-    int nWord = SearchWords.size();
-    std::vector<bool> WordFind(nWord, false);
-    int nfound=0;
+bool DictionaryBase::hasMatchInData(const std::vector<std::string> &SearchWords, uint32_t idxitemOffset, uint32_t idxitemSize, std::vector<bool> &placeHolderForData) {
+    int wordsNumber = SearchWords.size();
+    std::vector<bool> wordFound(wordsNumber, false);
+    if (placeHolderForData.size() < (idxitemSize + sizeof(uint32_t))) {
+        placeHolderForData.resize(idxitemSize + sizeof(uint32_t), '\0');
+    }
+    char *dataPtr = &placeHolderForData[0];
+    int nfound = 0;
 
     if (m_DictFile) {
         fseek(m_DictFile, idxitemOffset, SEEK_SET);
-        const size_t nitems = fread(originData, idxitemSize, 1, m_DictFile);
+        const size_t nitems = fread(dataPtr, idxitemSize, 1, m_DictFile);
         assert(nitems == 1);
     } else {
-        m_DictDzFile->read(originData, idxitemOffset, idxitemSize);
+        m_DictDzFile->read(dataPtr, idxitemOffset, idxitemSize);
     }
 
-    char *p = originData;
+    char *p = dataPtr;
     uint32_t sec_size;
     int j;
     if (!m_SameTypeSequence.empty()) {
-        int sametypesequence_len = m_SameTypeSequence.length();
-        for (int i=0; i<sametypesequence_len-1; i++) {
+        int sametypesequenceLength = m_SameTypeSequence.length();
+
+        for (int i = 0; i < sametypesequenceLength-1; i++) {
             switch (m_SameTypeSequence[i]) {
             case 'm':
             case 't':
@@ -184,32 +189,33 @@ bool DictionaryBase::SearchData(std::vector<std::string> &SearchWords, uint32_t 
             case 'g':
             case 'x':
             case 'k':
-                for (j=0; j<nWord; j++)
-                    if (!WordFind[j] && strstr(p, SearchWords[j].c_str())) {
-                        WordFind[j] = true;
+                for (j = 0; j < wordsNumber; j++) {
+                    if (!wordFound[j] && strstr(p, SearchWords[j].c_str())) {
+                        wordFound[j] = true;
                         ++nfound;
                     }
+                }
 
-
-                if (nfound==nWord) {
+                if (nfound == wordsNumber) {
                     return true;
                 }
 
-                sec_size = strlen(p)+1;
-                p+=sec_size;
+                sec_size = strlen(p) + 1;
+                p += sec_size;
                 break;
             default:
                 if (ascii_isupper(m_SameTypeSequence[i])) {
                     sec_size = get_uint32(p);
-                    sec_size += sizeof(guint32);
+                    sec_size += sizeof(uint32_t);
                 } else {
                     sec_size = strlen(p)+1;
                 }
-                p+=sec_size;
+
+                p += sec_size;
             }
         }
 
-        switch (m_SameTypeSequence[sametypesequence_len-1]) {
+        switch (m_SameTypeSequence[sametypesequenceLength-1]) {
         case 'm':
         case 't':
         case 'y':
@@ -217,21 +223,20 @@ bool DictionaryBase::SearchData(std::vector<std::string> &SearchWords, uint32_t 
         case 'g':
         case 'x':
         case 'k':
-            sec_size = idxitemSize - (p-originData);
-            for (j=0; j<nWord; j++)
-                if (!WordFind[j] &&
+            sec_size = idxitemSize - (p - dataPtr);
+            for (j = 0; j < wordsNumber; j++)
+                if (!wordFound[j] &&
                         strstr_len(p, sec_size, SearchWords[j].c_str())) {
-                    WordFind[j] = true;
+                    wordFound[j] = true;
                     ++nfound;
                 }
 
 
-            if (nfound==nWord)
-                return true;
+            if (nfound == wordsNumber) { return true; }
             break;
         }
     } else {
-        while (uint32_t(p - originData)<idxitemSize) {
+        while (uint32_t(p - dataPtr) < idxitemSize) {
             switch (*p) {
             case 'm':
             case 't':
@@ -240,16 +245,16 @@ bool DictionaryBase::SearchData(std::vector<std::string> &SearchWords, uint32_t 
             case 'g':
             case 'x':
             case 'k':
-                for (j=0; j<nWord; j++)
-                    if (!WordFind[j] && strstr(p, SearchWords[j].c_str())) {
-                        WordFind[j] = true;
+                for (j=0; j<wordsNumber; j++) {
+                    if (!wordFound[j] && strstr(p, SearchWords[j].c_str())) {
+                        wordFound[j] = true;
                         ++nfound;
                     }
+                }
 
-                if (nfound==nWord)
-                    return true;
-                sec_size = strlen(p)+1;
-                p+=sec_size;
+                if (nfound==wordsNumber) { return true; }
+                sec_size = strlen(p) + 1;
+                p += sec_size;
                 break;
             default:
                 if (ascii_isupper(*p)) {
@@ -258,7 +263,8 @@ bool DictionaryBase::SearchData(std::vector<std::string> &SearchWords, uint32_t 
                 } else {
                     sec_size = strlen(p)+1;
                 }
-                p+=sec_size;
+
+                p += sec_size;
             }
         }
     }
