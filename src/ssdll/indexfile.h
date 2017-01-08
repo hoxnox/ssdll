@@ -18,7 +18,7 @@ public:
     virtual std::string retrieveKey(int index, uint64_t &offset, uint32_t &size) = 0;
 };
 
-class OrdinaryIndexFile: IIndexFile {
+class OrdinaryIndexFile: public IIndexFile {
 public:
     OrdinaryIndexFile();
     virtual ~OrdinaryIndexFile();
@@ -87,7 +87,7 @@ private:
     bool m_Is64BitOffset;
 };
 
-class CompressedIndexFile: IIndexFile {
+class CompressedIndexFile: public IIndexFile {
 public:
     CompressedIndexFile();
 
@@ -98,6 +98,7 @@ public:
     virtual bool load(const std::string &filepath, bool is64bitOffset, unsigned int wordCount, size_t fileSize);
 #endif
     virtual bool findBounds(const std::string &word, uint64_t &offset, uint32_t &size);
+    virtual std::string retrieveKey(int index, uint64_t &offset, uint32_t &size);
 
 private:
     bool findInWords(const char *key, int &index);

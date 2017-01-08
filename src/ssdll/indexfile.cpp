@@ -404,6 +404,13 @@ bool CompressedIndexFile::findBounds(const std::string &word, uint64_t &offset, 
         return false;
     }
 
+    auto str = retrieveKey(index, offset, size);
+    UNUSED(str);
+
+    return true;
+}
+
+std::string CompressedIndexFile::retrieveKey(int index, uint64_t &offset, uint32_t &size) {
     const char *data = m_WordList[index];
     const char *p1 = data + strlen(data) + sizeof(char);
     if (m_Is64BitOffset) {
@@ -416,7 +423,7 @@ bool CompressedIndexFile::findBounds(const std::string &word, uint64_t &offset, 
 
     size = ntohl(get_uint32(p1));
 
-    return true;
+    return std::string(data);
 }
 
 bool CompressedIndexFile::findInWords(const char *key, int &index) {

@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <ctype.h>
 #include <cstring>
+#include <sys/stat.h>
 
 #define ISLOWER(c) ((c) >= 'a' && (c) <= 'z')
 #define ISUPPER(c) ((c) >= 'A' && (c) <= 'Z')
@@ -44,3 +45,29 @@ int ascii_strcasecmp(const char *s1, const char *s2) {
 
     return (((int)(unsigned char) *s1) - ((int)(unsigned char) *s2));
 }
+
+#ifdef _WIN32
+bool fileExists(const std::wstring &path) {
+    unsigned long long fileSize;
+    return fileExists(path, fileSize);
+}
+
+bool fileExists(const std::wstring &path, unsigned long long &fileSize) {
+    struct _stati64 sb;
+    bool exists = _wstati64(path.c_str(), &sb) == 0;
+    fileSize = sb.st_size;
+    return exists;
+}
+#else
+bool fileExists(const std::string &path) {
+    unsigned long long fileSize;
+    return fileExists(path, fileSize);
+}
+
+bool fileExists(const std::string &path, unsigned long long &fileSize) {
+    struct stat sb;
+    bool exists = stat(path.c_str(), &sb) == 0;
+    fileSize = sb.st_size;
+    return exists;
+}
+#endif
