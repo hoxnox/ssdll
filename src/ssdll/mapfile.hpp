@@ -24,25 +24,25 @@ public:
 
 public:
 #ifdef _WIN32
-    bool open(const std::wstring &filepath, unsigned long fileSize);
+    bool open(const std::wstring &filepath, size_t fileSize);
 #else
-    bool open(const std::string &filepath, unsigned long fileSize);
+    bool open(const std::string &filepath, size_t fileSize);
 #endif
     char *begin() { return m_Data; }
 
 private:
     char *m_Data;
-    unsigned long m_Size;
+    size_t m_Size;
     int m_mmap_fd;
 };
 
 #ifdef _WIN32
-bool MapFile::open(const std::wstring &filepath, unsigned long fileSize) {
+bool MapFile::open(const std::wstring &filepath, size_t fileSize) {
     if ((m_mmap_fd = _wfopen(filepath.c_str(), L"rb")) < 0) {
         return false;
     }
 #else
-bool MapFile::open(const std::string &filepath, unsigned long fileSize) {
+bool MapFile::open(const std::string &filepath, size_t fileSize) {
     if ((m_mmap_fd = fopen(filepath.c_str(), "rb")) < 0) {
         return false;
     }

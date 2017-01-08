@@ -1,6 +1,7 @@
 #include "worddata.h"
 #include <cassert>
 #include <cstdint>
+#include "utils.h"
 
 WordDataType parseDataType(char dataType) {
     switch (dataType) {
@@ -36,14 +37,14 @@ bool tryFindZeroChar(const std::vector<char> &data, size_t startWith, size_t &po
     return found;
 }
 
-bool readUInt32(const std::vector<char> &data, size_t pos, uint32_t &data) {
+bool readUInt32(const std::vector<char> &data, size_t pos, uint32_t &value) {
     assert((0 <= pos) && (pos < data.size()));
     bool ok = false;
 
     size_t len = data.size();
     if (pos + 3 <= len) {
         char *arr = &data[pos];
-        data = *((uint32_t*)s_num);
+        value = get_uint32(arr);
         ok = true;
     }
 

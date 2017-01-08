@@ -9,6 +9,18 @@
 
 typedef unsigned char guchar;
 
+uint32_t get_uint32(const char *addr) {
+    uint32_t result;
+    result = *((uint32_t*)addr);
+    return result;
+}
+
+uint64_t get_uint64(const char *addr) {
+    uint64_t result;
+    result = *((uint64_t*)addr);
+    return result;
+}
+
 bool ascii_isupper(char c) {
     return isascii(c) && isupper(c);
 }
