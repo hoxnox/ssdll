@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-inline uint32_t get_uint32(const char *addr);
-inline uint64_t get_uint64(const char *addr);
+uint32_t get_uint32(const char *addr);
+uint64_t get_uint64(const char *addr);
 bool ascii_isupper(char c);
 int ascii_strcasecmp(const char *s1, const char *s2);
 

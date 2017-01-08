@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DICTZIPLIB_H
+#define DICTZIPLIB_H
 
 #include <ctime>
 #include <string>
@@ -65,3 +66,4 @@ private:
     MapFile       mapfile;
 };
 
+#endif // DICTZIPLIB

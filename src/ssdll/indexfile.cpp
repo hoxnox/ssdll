@@ -1,5 +1,9 @@
 #include "indexfile.h"
 #include <cstdio>
+#include <cassert>
+#include <zlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "utils.h"
 #include "mapfile.hpp"
 
@@ -49,13 +53,17 @@ bool OrdinaryIndexFile::load(const std::string &filepath, bool is64bitOffset, un
 #else
     m_IndexFile = fopen(filepath.c_str(), "rb");
 #endif
-    if (m_IndexFile != nullptr) {
+    bool success = m_IndexFile != nullptr;
+
+    if (success) {
         m_First.assign(0, readFirstKeyOnPage(0));
         auto lastIndex = m_WordOffset.size() - 2;
         m_Last.assign(lastIndex, readFirstKeyOnPage(lastIndex));
         m_Middle.assign(lastIndex / 2, readFirstKeyOnPage(lastIndex / 2));
         m_RealLast.assign(m_WordCount - 1, retrieveKey(m_WordCount - 1));
     }
+
+    return success;
 }
 
 bool OrdinaryIndexFile::findBounds(const std::string &word, uint64_t &offset, uint32_t &size) {
@@ -103,7 +111,7 @@ bool OrdinaryIndexFile::createCache(const std::string &idxfilepath, size_t fileS
     int j = 0;
     int sizesSize = m_Is64BitOffset ? (sizeof(uint32_t) + sizeof(uint64_t)) : (2*sizeof(uint32_t));
 
-    for (int i = 0; i < m_WordCount; ++i) {
+    for (unsigned int i = 0; i < m_WordCount; ++i) {
         indexSize = strlen(curr) + 1 + sizesSize;
         if (i % ENTR_PER_PAGE == 0) {
             m_WordOffset[j] = curr - bufferBegin;
@@ -185,7 +193,7 @@ void OrdinaryIndexFile::saveCache(const std::string &idxfilepath) {
     fclose(out);
 }
 
-void OrdinaryIndexFile::CachedPage::parseIndexData(char *data, int nent, long index) {
+void OrdinaryIndexFile::CachedPage::parseIndexData(char *data, int nent, long index, bool is64Offset) {
     m_Index = index;
     char *p = data;
     long len;
@@ -195,7 +203,7 @@ void OrdinaryIndexFile::CachedPage::parseIndexData(char *data, int nent, long in
         len = strlen(p);
         p += len + 1;
 
-        if (m_Is64BitOffset) {
+        if (is64Offset) {
             m_Entries[i].m_Offset = ntohll(get_uint64(p));
             p += sizeof(uint64_t);
         } else {
@@ -220,10 +228,10 @@ int OrdinaryIndexFile::loadPage(int index) {
         m_PageData.resize(m_WordOffset[index + 1] - m_WordOffset[index]);
 
         fseek(m_IndexFile, m_WordOffset[index], SEEK_SET);
-        const size_t nitems = fread(&page_data[0], 1, m_PageData.size(), m_IndexFile);
+        const size_t nitems = fread(&m_PageData[0], 1, m_PageData.size(), m_IndexFile);
         assert(nitems == m_PageData.size());
 
-        m_Page.parseIndexData(&m_PageData[0], nentr, index);
+        m_Page.parseIndexData(&m_PageData[0], nentr, index, m_Is64BitOffset);
     }
 
     return nentr;
@@ -231,7 +239,7 @@ int OrdinaryIndexFile::loadPage(int index) {
 
 char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
     fseek(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
-    uint64_t pageSize = m_WordOffset[page_idx + 1] - m_WordOffset[page_idx];
+    uint64_t pageSize = m_WordOffset[pageIndex + 1] - m_WordOffset[pageIndex];
     const size_t nitems = fread(m_WordEntryBuffer,
                                 std::min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize)),
                                 1, m_IndexFile);
@@ -240,8 +248,8 @@ char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
     return m_WordEntryBuffer;
 }
 
-char *OrdinaryIndexFile::retrieveFirstKeyOnPage(int pageIndex) {
-    char *result = nullptr;
+const char *OrdinaryIndexFile::retrieveFirstKeyOnPage(int pageIndex) {
+    const char *result = nullptr;
 
     if (pageIndex < m_Middle.m_Index) {
         if (pageIndex == m_First.m_Index) {
@@ -287,7 +295,7 @@ bool OrdinaryIndexFile::findThroughPages(const char *key, int &index) {
     size_t middle = first + (last - first)/2;
 
     while (first <= last) {
-        char *curr = retrieveFirstKeyOnPage(middle);
+        const char *curr = retrieveFirstKeyOnPage(middle);
         int cmp = stardict_strcmp(key, curr);
 
         if (cmp == 0) { break; }
@@ -331,4 +339,108 @@ bool OrdinaryIndexFile::findInPage(const char *key, int &index) {
     } else {
         index += middle;
     }
+
+    return found;
+}
+
+
+CompressedIndexFile::CompressedIndexFile():
+    m_Is64BitOffset(false)
+{
+}
+
+#ifdef _WIN32
+bool CompressedIndexFile::load(const std::wstring &filepath, bool is64bitOffset, unsigned int wordCount, size_t fileSize) {
+#else
+bool CompressedIndexFile::load(const std::string &filepath, bool is64bitOffset, unsigned int wordCount, size_t fileSize) {
+#endif
+#ifdef _WIN32
+    int idxFile = _wopen(filepath.c_str(), O_RDONLY);
+#else
+    int idxFile = ::open(filepath.c_str(), O_RDONLY);
+#endif
+    if (idxFile < 0) { return false; }
+
+    gzFile in = gzdopen(idxFile, "rb");
+    if (in == nullptr) {
+        return false;
+    }
+
+    m_Is64BitOffset = is64bitOffset;
+    m_IdxDataBuffer.resize(fileSize);
+
+    const int len = gzread(in, &m_IdxDataBuffer[0], fileSize);
+    gzclose(in);
+
+    if ((len < 0) || (size_t(len) != fileSize)) {
+        return false;
+    }
+
+    m_WordList.resize(wordCount + 1);
+    char *p1 = &m_IdxDataBuffer[0];
+    int sizesSize = m_Is64BitOffset ? (sizeof(uint32_t) + sizeof(uint64_t)) : (2*sizeof(uint32_t));
+
+    for (unsigned int i=0; i < wordCount; ++i) {
+        m_WordList[i] = p1;
+        p1 += strlen(p1) + 1 + sizesSize;
+    }
+
+    m_WordList[wordCount] = p1;
+
+    return true;
+}
+
+bool CompressedIndexFile::findBounds(const std::string &word, uint64_t &offset, uint32_t &size) {
+    const char *key = word.c_str();
+
+    bool lessThanFirst = (stardict_strcmp(key, m_WordList[0]) < 0);
+    bool greaterThanLast = (stardict_strcmp(m_WordList[m_WordList.size() - 2], key) < 0);
+    if (lessThanFirst || greaterThanLast) {
+        return false;
+    }
+
+    int index = -1;
+    if (!findInWords(key, index)) {
+        return false;
+    }
+
+    const char *data = m_WordList[index];
+    const char *p1 = data + strlen(data) + sizeof(char);
+    if (m_Is64BitOffset) {
+        offset = ntohll(get_uint64(p1));
+        p1 += sizeof(uint64_t);
+    } else {
+        offset = ntohll(get_uint32(p1));
+        p1 += sizeof(uint32_t);
+    }
+
+    size = ntohl(get_uint32(p1));
+
+    return true;
+}
+
+bool CompressedIndexFile::findInWords(const char *key, int &index) {
+    size_t first = 0;
+    size_t last = m_WordList.size() - 2;
+    size_t middle = first + (last - first)/2;
+
+    while (first <= last) {
+        char *curr = m_WordList[middle];
+        int cmp = stardict_strcmp(key, curr);
+
+        if (cmp == 0) { break; }
+        else if (cmp < 0) { last = middle - 1; }
+        else { first = middle + 1; }
+
+        middle = first + (last - first)/2;
+    }
+
+    bool found = first <= last;
+    if (found) {
+        index = middle;
+    } else {
+        index = first;
+    }
+
+    return found;
 }

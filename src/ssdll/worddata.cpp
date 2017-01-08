@@ -43,7 +43,7 @@ bool readUInt32(const std::vector<char> &data, size_t pos, uint32_t &value) {
 
     size_t len = data.size();
     if (pos + 3 <= len) {
-        char *arr = &data[pos];
+        const char *arr = &data[pos];
         value = get_uint32(arr);
         ok = true;
     }
@@ -90,8 +90,8 @@ bool WordData::parseWithSameTypeSequence(const std::vector<char> &data, const st
 
 bool WordData::parseWithoutSameTypeSequence(const std::vector<char> &data) {
     bool success = false;
-
-    size_t pos = 0, delimPos = 0, blockSize = 0,
+    uint32_t blockSize = 0;
+    size_t pos = 0, delimPos = 0,
             posMax = data.size() - 1;
     bool anyError = false;
 
@@ -109,6 +109,7 @@ bool WordData::parseWithoutSameTypeSequence(const std::vector<char> &data) {
         case 'w':
         case 'h':
         case 'r':
+        {
             // block should be delimited by \0
             bool hasNext = tryFindZeroChar(data, pos + 1, delimPos);
             size_t endPos = hasNext ? (delimPos - 1) : posMax;
@@ -119,9 +120,11 @@ bool WordData::parseWithoutSameTypeSequence(const std::vector<char> &data) {
             pos = endPos + 1;
 
             break;
+        }
         case 'W':
         case 'P':
         case 'X':
+        {
             // read uint32 size and then block
             bool added = false;
             if (readUInt32(data, pos + 1, blockSize)) {
@@ -141,9 +144,12 @@ bool WordData::parseWithoutSameTypeSequence(const std::vector<char> &data) {
             if (!added) { anyError = true; }
 
             break;
+        }
         default:
+        {
             anyError = true;
             break;
+        }
         }
 
         if (anyError) { break; }
@@ -164,6 +170,8 @@ bool WordData::addDataChunk(const std::vector<char> &data, int start, int end, c
     if (nothingLikeThatIsAdded) {
         m_DataItems.insert(
                     std::make_pair(dataType,
-                                   WordDataItem(std::vector(data.begin() + start, data.begin() + end), dataType)));
+                                   WordDataItem(std::vector<char>(data.begin() + start, data.begin() + end), dataType)));
     }
+
+    return nothingLikeThatIsAdded;
 }

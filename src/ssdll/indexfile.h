@@ -7,7 +7,7 @@
 
 class IIndexFile {
 public:
-    virtual ~IndexFile() {}
+    virtual ~IIndexFile() {}
 
 #ifdef _WIN32
     virtual bool load(const std::wstring &filepath, bool is64bitOffset, unsigned int wordCount, size_t fileSize) = 0;
@@ -47,7 +47,7 @@ private:
         PageEntry m_Entries[ENTR_PER_PAGE];
 
         CachedPage(): m_Index(-1) {}
-        void parseIndexData(char *data, int nent, long index);
+        void parseIndexData(char *data, int nent, long index, bool is64Offset);
     };
 
 public:
@@ -65,12 +65,12 @@ private:
     void saveCache(const std::wstring &idxfilepath);
 #else
     bool createCache(const std::string &idxfilepath, size_t fileSize);
-    bool loadCache(const std::wstring &idxfilepath);
+    bool loadCache(const std::string &idxfilepath);
     void saveCache(const std::string &idxfilepath);
 #endif
     int loadPage(int index);
     char *readFirstKeyOnPage(int pageIndex);
-    char *retrieveFirstKeyOnPage(int pageIndex);
+    const char *retrieveFirstKeyOnPage(int pageIndex);
     virtual std::string retrieveKey(int index, uint64_t &offset, uint32_t &size);
     std::string retrieveKey(int index);
     bool findThroughPages(const char *key, int &index);
@@ -88,7 +88,24 @@ private:
 };
 
 class CompressedIndexFile: IIndexFile {
+public:
+    CompressedIndexFile();
 
+public:
+#ifdef _WIN32
+    virtual bool load(const std::wstring &filepath, bool is64bitOffset, unsigned int wordCount, size_t fileSize);
+#else
+    virtual bool load(const std::string &filepath, bool is64bitOffset, unsigned int wordCount, size_t fileSize);
+#endif
+    virtual bool findBounds(const std::string &word, uint64_t &offset, uint32_t &size);
+
+private:
+    bool findInWords(const char *key, int &index);
+
+private:
+    std::vector<char> m_IdxDataBuffer;
+    std::vector<char *> m_WordList;
+    bool m_Is64BitOffset;
 };
 
 #endif // INDEXFILE_H

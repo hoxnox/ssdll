@@ -5,7 +5,6 @@
 
 class SSDLLSHARED_EXPORT LookupDictionary
 {
-
 public:
     LookupDictionary();
 };

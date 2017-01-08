@@ -23,13 +23,6 @@ enum class WordDataType {
     Unknown
 };
 
-struct EnumClassHash {
-    template <typename T>
-    std::size_t operator()(T t) const {
-        return static_cast<std::size_t>(t);
-    }
-};
-
 class WordDataItem
 {
 public:
@@ -40,7 +33,7 @@ public:
     {}
 
     WordDataItem(WordDataItem &&other):
-        m_Data(std::move(other.m4_Data)),
+        m_Data(std::move(other.m_Data)),
         m_DataType(other.m_DataType)
     {}
 
@@ -66,7 +59,7 @@ private:
     bool addDataChunk(const std::vector<char> &data, int start, int end, char dataTypeC);
 
 private:
-    std::map<WordDataType, WordDataItem, EnumClassHash> m_DataItems;
+    std::map<WordDataType, WordDataItem> m_DataItems;
 };
 
 #endif // WORDDATA_H

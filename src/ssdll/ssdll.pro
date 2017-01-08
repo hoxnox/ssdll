@@ -18,7 +18,8 @@ SOURCES += lookupdictionary.cpp \
     dictionarybase.cpp \
     utils.cpp \
     worddata.cpp \
-    indexfile.cpp
+    indexfile.cpp \
+    mapfile.cpp
 
 HEADERS += lookupdictionary.h\
         ssdll_global.h \
