@@ -18,13 +18,16 @@ public:
 #else
     bool init(const std::string &ifoPath, bool isTreeDict);
 #endif
+    bool isOffset64Bit() const { return m_IndexOffsetBits == 64; }
+    unsigned long long getIndexFileSize() const { return m_IndexFileSize; }
+    int getWordCount() { return m_WordCount; }
 
 private:
     bool initFromMap(const std::map<std::string, std::string> &options);
 
 private:
     int m_WordCount;
-    int m_IndexFileSize;
+    unsigned long long m_IndexFileSize;
     int m_IndexOffsetBits;
 #ifdef _WIN32
     std::wstring m_Filepath;

@@ -1,4 +1,5 @@
 #include "dictionaryprivate.h"
+#include <cassert>
 #include "utils.h"
 
 #ifdef _WIN32
@@ -46,7 +47,7 @@ bool DictionaryPrivate::readDictionary() {
     do {
 #ifdef _WIN32
         std::wstring dictFilePath(m_IfoFilePath);
-        dictFilePath.replace(dictFilePath.length() - sizeof(L"ifo") + 1, sizeof(L"ifo") - 1, L"dict.dz");
+        dictFilePath.replace(dictFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, L"dict.dz");
 #else
         std::string dictFilePath(m_IfoFilePath);
         dictFilePath.replace(dictFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, "dict.dz");
@@ -78,7 +79,7 @@ bool DictionaryPrivate::readIndex() {
     do {
 #ifdef _WIN32
         std::wstring idxFilePath(m_IfoFilePath);
-        idxFilePath.replace(idxFilePath.length() - sizeof(L"ifo") + 1, sizeof(L"ifo") - 1, L"idx.dz");
+        idxFilePath.replace(idxFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, L"idx.dz");
 #else
         std::string idxFilePath(m_IfoFilePath);
         idxFilePath.replace(idxFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, "idx.dz");
@@ -88,11 +89,8 @@ bool DictionaryPrivate::readIndex() {
         if (fileExists(idxFilePath, fileSize)) {
             m_IndexFile.reset(new CompressedIndexFile());
         } else {
-#ifdef _WIN32
-            idxFilePath.erase(idxFilePath.length() - sizeof(L".gz") + 1, sizeof(L".gz") - 1);
-#else
             idxFilePath.erase(idxFilePath.length() - sizeof(".gz") + 1, sizeof(".gz") - 1);
-#endif
+
             if (!fileExists(idxFilePath, fileSize)) {
                 break;
             }
@@ -100,7 +98,14 @@ bool DictionaryPrivate::readIndex() {
             m_IndexFile.reset(new OrdinaryIndexFile());
         }
 
-        //if (!m_IndexFile->load())
+        assert(fileSize == m_DictMetadata.getIndexFileSize());
+
+        if (!m_IndexFile->load(idxFilePath,
+                               m_DictMetadata.isOffset64Bit(),
+                               m_DictMetadata.getWordCount(),
+                               fileSize)) {
+            break;
+        }
 
         result = true;
     } while (false);

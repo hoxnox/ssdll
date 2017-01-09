@@ -26,6 +26,18 @@ bool tryGetValue(const std::map<std::string, std::string> &keyValueStore, const 
     return found;
 }
 
+bool tryGetValue(const std::map<std::string, std::string> &keyValueStore, const std::string &key, unsigned long long &value) {
+    bool found = false;
+
+    auto it = keyValueStore.find(key);
+    if (it != keyValueStore.end()) {
+        value = std::stoull(it->second);
+        found = true;
+    }
+
+    return found;
+}
+
 #ifdef _WIN32
 bool DictionaryMetadata::init(const std::wstring &ifoPath, bool isTreeDict) {
     std::wifstream ifoStream(ifoPath.c_str());
