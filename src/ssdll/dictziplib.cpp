@@ -308,7 +308,7 @@ bool DictData::open(const std::string& fname, bool computeCRC) {
 #ifdef _WIN32
     if ((fd = _wopen(fname.c_str(), O_RDONLY)) < 0) {
 #else
-    if ((fd = open(fname.c_str(), O_RDONLY)) < 0) {
+    if ((fd = ::open(fname.c_str(), O_RDONLY)) < 0) {
 #endif
 		//err_fatal_errno( __FUNCTION__,
 		//       "Cannot open data file \"%s\"\n", fname );
@@ -365,9 +365,9 @@ void DictData::close() {
 	}
 }
 
-void DictData::read(char *buffer, unsigned long start, unsigned long size) {
+void DictData::read(char *buffer, uint64_t start, uint64_t size) {
 	char          *pt;
-	unsigned long end;
+    uint64_t      end;
 	int           count;
 	char          *inBuffer;
 	char          outBuffer[OUT_BUFFER_SIZE];

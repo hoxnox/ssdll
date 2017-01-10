@@ -11,15 +11,16 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 DEFINES += SSDLL_LIBRARY
+DEFINES += "_FILE_OFFSET_BITS=64"
 
 SOURCES += lookupdictionary.cpp \
     dictionarymetadata.cpp \
     dictziplib.cpp \
-    dictionarybase.cpp \
     utils.cpp \
     worddata.cpp \
     indexfile.cpp \
     mapfile.cpp \
+    basicdictionary.cpp \
     dictionaryprivate.cpp
 
 HEADERS += lookupdictionary.h\
@@ -27,10 +28,10 @@ HEADERS += lookupdictionary.h\
     dictionarymetadata.h \
     dictziplib.hpp \
     mapfile.hpp \
-    dictionarybase.h \
     utils.h \
     worddata.h \
     indexfile.h \
+    basicdictionary.h \
     dictionaryprivate.h
 
 INCLUDEPATH += ../

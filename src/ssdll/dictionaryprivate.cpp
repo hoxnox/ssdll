@@ -8,15 +8,11 @@ DictionaryPrivate::DictionaryPrivate(const std::wstring &ifoFilePath):
 DictionaryPrivate::DictionaryPrivate(const std::string &ifoFilePath):
 #endif
     m_IfoFilePath(ifoFilePath),
-    m_DictFile(nullptr),
     m_IsLoaded(false)
 {
 }
 
 DictionaryPrivate::~DictionaryPrivate() {
-    if (m_DictFile != nullptr) {
-        fclose(m_DictFile);
-    }
 }
 
 bool DictionaryPrivate::loadDictionary() {
@@ -42,35 +38,42 @@ bool DictionaryPrivate::loadDictionary() {
     return m_IsLoaded;
 }
 
-bool DictionaryPrivate::readDictionary() {
+void DictionaryPrivate::unloadDictionary() {
+    m_IfoFilePath.clear();
+    m_DictMetadata.clear();
+    m_IndexFile.reset();
+    m_BasicDictionary.unload();
+    m_IsLoaded = true;
+}
+
+bool DictionaryPrivate::findPureMeaning(const std::string &word, std::string &meaning) {
+    if (!m_IsLoaded) { return false; }
     bool result = false;
-    do {
-#ifdef _WIN32
-        std::wstring dictFilePath(m_IfoFilePath);
-        dictFilePath.replace(dictFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, L"dict.dz");
-#else
-        std::string dictFilePath(m_IfoFilePath);
-        dictFilePath.replace(dictFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, "dict.dz");
-#endif
-        if (fileExists(dictFilePath)) {
-            m_DictGzFile.reset(new DictData());
-            if (!m_DictGzFile->open(dictFilePath, false)) {
-                break;
-            }
-        } else {
-#ifdef _WIN32
-            m_DictFile = _wfopen(dictFilePath.c_str(), L"rb");
-#else
-            m_DictFile = fopen(dictFilePath.c_str(), "rb");
-#endif
-            if (!m_DictFile) {
-                break;
+
+    uint64_t offset = 0;
+    uint32_t size = 0;
+
+    if (m_IndexFile->findBounds(word, offset, size)) {
+        std::vector<char> rawWordData;
+        m_BasicDictionary.readWordData(offset, size, rawWordData);
+
+        WordData wordData;
+        if (wordData.parse(rawWordData, m_DictMetadata.getSameTypeSequence())) {
+            std::shared_ptr<WordDataItem> wordDataPtr;
+
+            if (wordData.tryGetItem(WordDataType::PureTextMeaning, wordDataPtr)) {
+                auto &data = wordDataPtr->getData();
+                meaning = std::string(data.begin(), data.end());
+                result = true;
             }
         }
+    }
 
-        result = true;
-    } while (false);
+    return result;
+}
 
+bool DictionaryPrivate::readDictionary() {
+    bool result = m_BasicDictionary.readDictionary(m_IfoFilePath);
     return result;
 }
 

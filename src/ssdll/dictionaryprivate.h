@@ -5,7 +5,7 @@
 #include <string>
 #include <cstdio>
 #include "indexfile.h"
-#include "dictionarybase.h"
+#include "basicdictionary.h"
 #include "dictziplib.hpp"
 #include "dictionarymetadata.h"
 
@@ -23,6 +23,7 @@ public:
 public:
     bool loadDictionary();
     void unloadDictionary();
+    bool findPureMeaning(const std::string &word, std::string &meaning);
 
 private:
     bool readDictionary();
@@ -36,8 +37,7 @@ private:
 #endif
     std::unique_ptr<IIndexFile> m_IndexFile;
     DictionaryMetadata m_DictMetadata;
-    FILE *m_DictFile;
-    std::unique_ptr<DictData> m_DictGzFile;
+    BasicDictionary m_BasicDictionary;
     volatile bool m_IsLoaded;
 };
 

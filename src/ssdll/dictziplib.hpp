@@ -28,7 +28,7 @@ public:
     bool open(const std::string& filename, bool computeCRC);
 #endif
 	void close();
-	void read(char *buffer, unsigned long start, unsigned long size);
+    void read(char *buffer, uint64_t start, uint64_t size);
 
 private:
 #ifdef _WIN32

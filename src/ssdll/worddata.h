@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <memory>
 #include <string>
 
 enum class WordDataType {
@@ -52,6 +53,7 @@ public:
 
 public:
     bool parse(const std::vector<char> &data, const std::string &sameTypeSequence);
+    bool tryGetItem(WordDataType dataType, std::shared_ptr<WordDataItem> &item) const;
 
 private:
     bool parseWithSameTypeSequence(const std::vector<char> &data, const std::string &sameTypeSequence);
@@ -59,7 +61,7 @@ private:
     bool addDataChunk(const std::vector<char> &data, int start, int end, char dataTypeC);
 
 private:
-    std::map<WordDataType, WordDataItem> m_DataItems;
+    std::map<WordDataType, std::shared_ptr<WordDataItem> > m_DataItems;
 };
 
 #endif // WORDDATA_H

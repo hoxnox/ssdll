@@ -65,6 +65,18 @@ bool WordData::parse(const std::vector<char> &data, const std::string &sameTypeS
     return parseResult;
 }
 
+bool WordData::tryGetItem(WordDataType dataType, std::shared_ptr<WordDataItem> &item) const {
+    bool found = false;
+    auto it = m_DataItems.find(dataType);
+
+    if (it != m_DataItems.end()) {
+        item = it->second;
+        found = true;
+    }
+
+    return found;
+}
+
 bool WordData::parseWithSameTypeSequence(const std::vector<char> &data, const std::string &sameTypeSequence) {
     size_t pos = 0, posMax = data.size() - 1;
     size_t sequenceIndex = 0;
@@ -168,9 +180,8 @@ bool WordData::addDataChunk(const std::vector<char> &data, int start, int end, c
     assert(nothingLikeThatIsAdded);
 
     if (nothingLikeThatIsAdded) {
-        m_DataItems.insert(
-                    std::make_pair(dataType,
-                                   WordDataItem(std::vector<char>(data.begin() + start, data.begin() + end), dataType)));
+        std::shared_ptr<WordDataItem> dataItem(new WordDataItem(std::vector<char>(data.begin() + start, data.begin() + end), dataType));
+        m_DataItems.insert(std::make_pair(dataType, dataItem));
     }
 
     return nothingLikeThatIsAdded;

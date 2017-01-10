@@ -86,6 +86,21 @@ bool DictionaryMetadata::init(const std::string &ifoPath, bool isTreeDict) {
     return success;
 }
 
+void DictionaryMetadata::clear() {
+    m_WordCount = 0;
+    m_IndexFileSize = 0;
+    m_IndexOffsetBits = 0;
+    m_Filepath.clear();
+    m_BaseName.clear();
+    m_Bookname.clear();
+    m_Author.clear();
+    m_Email.clear();
+    m_Website.clear();
+    m_Date.clear();
+    m_Description.clear();
+    m_SameTypeSequence.clear();
+}
+
 bool DictionaryMetadata::initFromMap(const std::map<std::string, std::string> &options) {
     bool anyError = false;
 
