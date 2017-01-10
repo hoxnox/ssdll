@@ -59,13 +59,12 @@ bool DictionaryMetadata::init(const std::string &ifoPath, bool isTreeDict) {
     std::map<std::string, std::string> options;
 
     do {
-        ifoContents >> currLine;
-        if (currLine != header) {
+        if (std::getline(ifoContents, currLine) && (currLine != header)) {
             anyError = true;
             break;
         }
 
-        while (ifoContents >> currLine) {
+        for (; std::getline(ifoContents, currLine); ) {
             auto pos = currLine.find('=');
             if (pos != std::string::npos) {
                 auto key = currLine.substr(0, pos);
@@ -79,7 +78,7 @@ bool DictionaryMetadata::init(const std::string &ifoPath, bool isTreeDict) {
     } while (false);
 
     if (!anyError) {
-        anyError = initFromMap(options);
+        anyError = !initFromMap(options);
     }
 
     bool success = !anyError;

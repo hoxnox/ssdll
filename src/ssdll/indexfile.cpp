@@ -7,6 +7,8 @@
 #include "utils.h"
 #include "mapfile.hpp"
 
+#include <iostream>
+
 static inline int stardict_strcmp(const char *s1, const char *s2) {
     const int caseResult = ascii_strcasecmp(s1, s2);
     if (caseResult == 0) {
@@ -128,13 +130,13 @@ bool OrdinaryIndexFile::createCache(const std::string &idxfilepath, size_t fileS
 
 #ifdef _WIN32
 bool OrdinaryIndexFile::loadCache(const std::wstring &idxfilepath) {
-    std::wstring cachePath = idxfilepath + L".ifo";
+    std::wstring cachePath = idxfilepath + L".oft";
     struct _stati64 sb, idxsb;
     int statResult = _wstati64(cachePath.c_str(), &sb);
     int idxStatResult = _wstati64(idxfilepath.c_str(), &idxsb);
 #else
 bool OrdinaryIndexFile::loadCache(const std::string &idxfilepath) {
-    std::string cachePath = idxfilepath + ".ifo";
+    std::string cachePath = idxfilepath + ".oft";
     struct stat sb, idxsb;
     int statResult = stat(cachePath.c_str(), &sb);
     int idxStatResult = stat(idxfilepath.c_str(), &idxsb);
@@ -171,10 +173,12 @@ bool OrdinaryIndexFile::loadCache(const std::string &idxfilepath) {
 
 #ifdef _WIN32
 void OrdinaryIndexFile::saveCache(const std::wstring &idxfilepath) {
-    FILE *out = _wfopen(idxfilepath.c_str(), L"wb");
+    std::wstring cacheFilepath = idxfilepath + L".oft";
+    FILE *out = _wfopen(cacheFilepath.c_str(), L"wb");
 #else
 void OrdinaryIndexFile::saveCache(const std::string &idxfilepath) {
-    FILE *out = fopen(idxfilepath.c_str(), "wb");
+    std::string cacheFilepath = idxfilepath + ".oft";
+    FILE *out = fopen(cacheFilepath.c_str(), "wb");
 #endif
     if (!out) { return; }
 
@@ -240,9 +244,8 @@ int OrdinaryIndexFile::loadPage(int index) {
 char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
     fseek(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
     uint64_t pageSize = m_WordOffset[pageIndex + 1] - m_WordOffset[pageIndex];
-    const size_t nitems = fread(m_WordEntryBuffer,
-                                std::min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize)),
-                                1, m_IndexFile);
+    const size_t bytesToRead = std::min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));
+    const size_t nitems = fread(m_WordEntryBuffer, bytesToRead, 1, m_IndexFile);
     assert(nitems == 1);
     // TODO: check returned values, deal with word entry that strlen>255.
     return m_WordEntryBuffer;

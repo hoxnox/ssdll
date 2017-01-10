@@ -176,7 +176,7 @@ bool WordData::addDataChunk(const std::vector<char> &data, int start, int end, c
 
     auto dataType = parseDataType(dataTypeC);
     auto it = m_DataItems.find(dataType);
-    bool nothingLikeThatIsAdded = (it != m_DataItems.end());
+    bool nothingLikeThatIsAdded = (it == m_DataItems.end());
     assert(nothingLikeThatIsAdded);
 
     if (nothingLikeThatIsAdded) {

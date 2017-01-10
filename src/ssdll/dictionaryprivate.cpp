@@ -99,9 +99,8 @@ bool DictionaryPrivate::readIndex() {
             }
 
             m_IndexFile.reset(new OrdinaryIndexFile());
+            assert(fileSize == m_DictMetadata.getIndexFileSize());
         }
-
-        assert(fileSize == m_DictMetadata.getIndexFileSize());
 
         if (!m_IndexFile->load(idxFilePath,
                                m_DictMetadata.isOffset64Bit(),
