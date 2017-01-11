@@ -61,7 +61,8 @@ bool DictionaryPrivate::findPureMeaning(const std::string &word, std::string &me
         if (wordData.parse(rawWordData, m_DictMetadata.getSameTypeSequence())) {
             std::shared_ptr<WordDataItem> wordDataPtr;
 
-            if (wordData.tryGetItem(WordDataType::PureTextMeaning, wordDataPtr)) {
+            if (wordData.tryGetItem(WordDataType::PureTextMeaning, wordDataPtr) ||
+                    wordData.tryGetItem(WordDataType::PureTextLocalMeaning, wordDataPtr)) {
                 auto &data = wordDataPtr->getData();
                 meaning = std::string(data.begin(), data.end());
                 result = true;

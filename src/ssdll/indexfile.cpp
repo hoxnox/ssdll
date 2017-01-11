@@ -7,8 +7,6 @@
 #include "utils.h"
 #include "mapfile.hpp"
 
-#include <iostream>
-
 static inline int stardict_strcmp(const char *s1, const char *s2) {
     const int caseResult = ascii_strcasecmp(s1, s2);
     if (caseResult == 0) {
@@ -41,6 +39,9 @@ bool OrdinaryIndexFile::load(const std::string &filepath, bool is64bitOffset, un
 #endif
     m_WordCount = wordCount;
     m_Is64BitOffset = is64bitOffset;
+
+    unsigned int npages = (m_WordCount - 1) / ENTR_PER_PAGE + 2;
+    m_WordOffset.resize(npages, 0);
 
     if (!loadCache(filepath)) {
         if (createCache(filepath, fileSize)) {
@@ -94,7 +95,7 @@ bool OrdinaryIndexFile::findBounds(const std::string &word, uint64_t &offset, ui
 }
 
 #ifdef _WIN32
-bool OrdinaryIndexFile::createCache(const std::wstring &idxfilepath, size_t fileSize {
+bool OrdinaryIndexFile::createCache(const std::wstring &idxfilepath, size_t fileSize) {
 #else
 bool OrdinaryIndexFile::createCache(const std::string &idxfilepath, size_t fileSize) {
 #endif
@@ -102,9 +103,6 @@ bool OrdinaryIndexFile::createCache(const std::string &idxfilepath, size_t fileS
     if (!mapFile.open(idxfilepath, fileSize)) {
         return false;
     }
-
-    unsigned int npages = (m_WordCount - 1) / ENTR_PER_PAGE + 2;
-    m_WordOffset.resize(npages, 0);
 
     const char *bufferBegin = mapFile.begin();
 
@@ -242,6 +240,7 @@ int OrdinaryIndexFile::loadPage(int index) {
 }
 
 char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
+    assert(m_IndexFile != nullptr);
     fseek(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
     uint64_t pageSize = m_WordOffset[pageIndex + 1] - m_WordOffset[pageIndex];
     const size_t bytesToRead = std::min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));

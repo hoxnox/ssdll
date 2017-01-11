@@ -35,6 +35,6 @@ void TranslatorDemo::readWord() {
             std::cout << "Not found";
         }
 
-        std::cout << "> " << std::flush;
+        std::cout << std::endl << "> " << std::flush;
     }
 }
