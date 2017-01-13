@@ -22,6 +22,6 @@ int main(int argc, char *argv[]) {
     demo.connectEntities();
     QObject::connect(&demo, SIGNAL(quit()), &app, SLOT(quit()));
 
-    std::cout << "Ready!" << std::endl;
+    std::cout << "Ready!" << std::endl << "> " << std::flush;
     return app.exec();
 }

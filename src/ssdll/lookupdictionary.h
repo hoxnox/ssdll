@@ -20,7 +20,7 @@ public:
     bool loadDictionary(const std::string &ifoFilepath);
 #endif
     void unloadDictionary();
-    bool translate(const std::string &word, std::string &meaning);
+    bool translate(const std::string &word, std::string &translation);
 
 private:
     std::unique_ptr<DictionaryPrivate> m_DictionaryPrivate;

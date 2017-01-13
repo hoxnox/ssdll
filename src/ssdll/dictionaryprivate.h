@@ -23,7 +23,7 @@ public:
 public:
     bool loadDictionary();
     void unloadDictionary();
-    bool findPureMeaning(const std::string &word, std::string &meaning);
+    bool translate(const std::string &word, std::string &translation);
 
 private:
     bool readDictionary();

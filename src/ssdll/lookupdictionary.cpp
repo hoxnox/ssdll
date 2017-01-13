@@ -24,9 +24,9 @@ void LookupDictionary::unloadDictionary() {
     m_DictionaryPrivate->unloadDictionary();
 }
 
-bool LookupDictionary::translate(const std::string &word, std::string &meaning) {
+bool LookupDictionary::translate(const std::string &word, std::string &translation) {
     if (!m_DictionaryPrivate) { return false; }
 
-    bool success = m_DictionaryPrivate->findPureMeaning(word, meaning);
+    bool success = m_DictionaryPrivate->translate(word, translation);
     return success;
 }

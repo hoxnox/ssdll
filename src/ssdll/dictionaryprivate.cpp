@@ -2,6 +2,137 @@
 #include <cassert>
 #include "utils.h"
 
+void replaceStringG(std::string& str, const std::string& replaceWhat, const std::string& replaceTo) {
+    size_t pos = 0;
+    while ((pos = str.find(replaceWhat, pos)) != std::string::npos) {
+         str.replace(pos, replaceWhat.length(), replaceTo);
+         pos += replaceTo.length();
+    }
+}
+
+bool startsWith(const std::vector<char> &data, size_t pos, const std::string &prefix) {
+    bool anyError = false;
+
+    const size_t size = data.size();
+    const size_t prefixSize = prefix.size();
+    size_t i = pos, j = 0;
+
+    while ((i < size) && (j < prefixSize)) {
+        if (data[i] != prefix[j]) {
+            anyError = true;
+            break;
+        }
+
+        i++;
+        j++;
+    }
+
+    bool ok = (!anyError) && (j == prefixSize) && (i <= size);
+    return ok;
+}
+
+bool tryGetTag(const std::vector<char> &data, size_t pos, std::string &tagName) {
+    if (pos >= data.size()) { return false; }
+    assert(data[pos] == '<');
+    if (data[pos] != '<') { return false; }
+
+    const size_t maxTagLen = 10;
+    tagName.clear();
+    tagName.reserve(maxTagLen);
+
+    size_t size = data.size(), i = pos + 1;
+    while (i < size) {
+        char c = data[i];
+        if ((c != '>') && ((i - pos) <= maxTagLen)) {
+            tagName.push_back(c);
+            i++;
+        } else {
+            break;
+        }
+    }
+
+    bool success = (i < size) && (data[i] == '>') && (!tagName.empty());
+    return success;
+}
+
+std::string simplifyMarkup(const std::vector<char> &xdxfLikeData) {
+#define GREATER "&gt;"
+#define LESS "&lt;"
+#define AMPERSAND "&amp;"
+#define QUOTATION "&quot;"
+#define APOSTROPHE "&apos;"
+
+    std::vector<char> result;
+    size_t size = xdxfLikeData.size(), i = 0;
+    result.reserve(size);
+    std::string tag;
+
+    while (i < size) {
+        char c = xdxfLikeData[i];
+
+        if (c == '&') {
+            if (startsWith(xdxfLikeData, i, GREATER)) {
+                result.push_back('>');
+                i += strlen(GREATER);
+            } else if (startsWith(xdxfLikeData, i, LESS)) {
+                result.push_back('<');
+                i += strlen(LESS);
+            } else if (startsWith(xdxfLikeData, i, AMPERSAND)) {
+                result.push_back('&');
+                i += strlen(AMPERSAND);
+            } else if (startsWith(xdxfLikeData, i, QUOTATION)) {
+                result.push_back('\"');
+                i += strlen(QUOTATION);
+            } else if (startsWith(xdxfLikeData, i, APOSTROPHE)) {
+                result.push_back('\'');
+                i += strlen(APOSTROPHE);
+            } else {
+                result.push_back(c);
+                i++;
+            }
+        } else if ((c == '<') && tryGetTag(xdxfLikeData, i, tag)) {
+            bool skip = false;
+
+            if ((tag == "b") || (tag == "s") || (tag == "i")) {
+                result.push_back(c);
+                i++;
+                skip = true;
+            }
+
+            else if (tag == "tr") {
+                result.push_back('[');
+            } else if (tag == "/tr") {
+                result.push_back(']');
+            }
+
+            else if (tag == "kref") {
+                result.push_back('{');
+            } else if (tag == "/kref") {
+                result.push_back('}');
+            }
+
+            else if ((tag == "ex") || (tag == "\ex")) {
+                result.push_back('\\');
+            }
+
+            if (!skip) {
+                i += tag.size() + 1 + 1;
+            }
+        } else {
+            result.push_back(c);
+            i++;
+        }
+    }
+
+#undef GREATER
+#undef LESS
+#undef AMPERSAND
+#undef QUOTATION
+#undef APOSTROPHE
+    std::string strResult(result.begin(), result.end());
+    return strResult;
+}
+
 #ifdef _WIN32
 DictionaryPrivate::DictionaryPrivate(const std::wstring &ifoFilePath):
 #else
@@ -46,7 +177,7 @@ void DictionaryPrivate::unloadDictionary() {
     m_IsLoaded = true;
 }
 
-bool DictionaryPrivate::findPureMeaning(const std::string &word, std::string &meaning) {
+bool DictionaryPrivate::translate(const std::string &word, std::string &translation) {
     if (!m_IsLoaded) { return false; }
     bool result = false;
 
@@ -64,7 +195,17 @@ bool DictionaryPrivate::findPureMeaning(const std::string &word, std::string &me
             if (wordData.tryGetItem(WordDataType::PureTextMeaning, wordDataPtr) ||
                     wordData.tryGetItem(WordDataType::PureTextLocalMeaning, wordDataPtr)) {
                 auto &data = wordDataPtr->getData();
-                meaning = std::string(data.begin(), data.end());
+                translation = std::string(data.begin(), data.end());
+                result = true;
+            } else if (wordData.tryGetItem(WordDataType::XdxfMarkupData, wordDataPtr) ||
+                       wordData.tryGetItem(WordDataType::PangoMarkupData, wordDataPtr)) {
+                auto &data = wordDataPtr->getData();
+                translation = simplifyMarkup(data);
+                result = true;
+            } else if (wordData.tryGetItem(WordDataType::PowerWordData, wordDataPtr) ||
+                       wordData.tryGetItem(WordDataType::KanaData, wordDataPtr)) {
+                auto &data = wordDataPtr->getData();
+                translation = std::string(data.begin(), data.end());
                 result = true;
             }
         }
