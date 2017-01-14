@@ -233,7 +233,11 @@ int OrdinaryIndexFile::loadPage(int index) {
     if (index != m_Page.m_Index) {
         m_PageData.resize(m_WordOffset[index + 1] - m_WordOffset[index]);
 
+#ifdef _WIN32
+        _fseeki64(m_IndexFile, m_WordOffset[index], SEEK_SET);
+#else
         fseek(m_IndexFile, m_WordOffset[index], SEEK_SET);
+#endif
         const size_t nitems = fread(&m_PageData[0], 1, m_PageData.size(), m_IndexFile);
         assert(nitems == m_PageData.size());
 
@@ -245,7 +249,11 @@ int OrdinaryIndexFile::loadPage(int index) {
 
 char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
     assert(m_IndexFile != nullptr);
+#ifdef _WIN32
+    _fseeki64(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
+#else
     fseek(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
+#endif
     uint64_t pageSize = m_WordOffset[pageIndex + 1] - m_WordOffset[pageIndex];
     const size_t bytesToRead = min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));
     const size_t nitems = fread(m_WordEntryBuffer, bytesToRead, 1, m_IndexFile);
