@@ -3,6 +3,10 @@
 #include <cstdint>
 #include "utils.h"
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#endif
+
 WordDataType parseDataType(char dataType) {
     switch (dataType) {
     case 'm': return WordDataType::PureTextMeaning;
@@ -144,7 +148,7 @@ bool WordData::parseWithoutSameTypeSequence(const std::vector<char> &data) {
                 size_t blockStart = pos + 1 + sizeof(uint32_t);
                 size_t blockEnd = blockStart + blockSize - 1;
                 assert(blockEnd <= posMax);
-                blockEnd = std::min(blockEnd, posMax);
+                blockEnd = min(blockEnd, posMax);
 
                 if (addDataChunk(data, blockStart, blockEnd, c)) {
                     added = true;

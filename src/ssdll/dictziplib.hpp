@@ -46,7 +46,7 @@ private:
 	z_stream      zStream;
 	int           initialized;
   
-	int           headerLength;
+    size_t           headerLength;
 	int           method;
 	int           flags;
 	time_t        mtime;
@@ -57,8 +57,13 @@ private:
 	int           chunkCount;
 	int           *chunks;
 	unsigned long *offsets;	/* Sum-scan of chunks. */
-	std::string    origFilename;
-	std::string    comment;
+#ifdef _WIN32
+    std::wstring    origFilename;
+    std::wstring    comment;
+#else
+    std::string    origFilename;
+    std::string    comment;
+#endif
 	unsigned long crc;
 	unsigned long length;
 	unsigned long compressedLength;

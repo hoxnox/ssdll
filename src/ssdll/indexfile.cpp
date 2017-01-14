@@ -7,6 +7,10 @@
 #include "utils.h"
 #include "mapfile.hpp"
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#endif
+
 static inline int stardict_strcmp(const char *s1, const char *s2) {
     const int caseResult = ascii_strcasecmp(s1, s2);
     if (caseResult == 0) {
@@ -243,7 +247,7 @@ char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
     assert(m_IndexFile != nullptr);
     fseek(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
     uint64_t pageSize = m_WordOffset[pageIndex + 1] - m_WordOffset[pageIndex];
-    const size_t bytesToRead = std::min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));
+    const size_t bytesToRead = min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));
     const size_t nitems = fread(m_WordEntryBuffer, bytesToRead, 1, m_IndexFile);
     assert(nitems == 1);
     // TODO: check returned values, deal with word entry that strlen>255.

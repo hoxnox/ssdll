@@ -36,6 +36,13 @@ HEADERS += lookupdictionary.h\
 
 INCLUDEPATH += ../
 
+win32 {
+    LIBS += -L"$$PWD/../libs/"
+    INCLUDEPATH += ../zlib-1.2.8/
+    LIBS += -lz
+    LIBS += -lmman
+}
+
 unix {
     LIBS += -lz
 }

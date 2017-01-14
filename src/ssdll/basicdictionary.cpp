@@ -12,7 +12,11 @@ void BasicDictionary::readWordData(uint64_t idxitemOffset, uint32_t idxitemSize,
     char *buffer = &wordData[0];
 
     if (m_DictFile) {
+#ifdef _WIN32
+        _fseeki64(m_DictFile, idxitemOffset, SEEK_SET);
+#else
         fseek(m_DictFile, idxitemOffset, SEEK_SET);
+#endif
         size_t nitems = fread(buffer, idxitemSize, 1, m_DictFile);
         assert(nitems == 1);
     } else {
@@ -29,7 +33,7 @@ void BasicDictionary::readWordData(uint64_t idxitemOffset, uint32_t idxitemSize,
 }
 
 #ifdef _WIN32
-bool DictionaryBase::readDictionary(const std::string &ifoFilepath) {
+bool BasicDictionary::readDictionary(const std::wstring &ifoFilepath) {
     bool result = false;
     std::wstring dictFilePath(ifoFilepath);
     dictFilePath.replace(dictFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, L"dict.dz");
@@ -78,7 +82,7 @@ void BasicDictionary::unload() {
     m_CurrCacheIndex = 0;
 }
 
-bool BasicDictionary::tryGetCached(uint32_t idxitemOffset, std::vector<char> &data) {
+bool BasicDictionary::tryGetCached(uint64_t idxitemOffset, std::vector<char> &data) {
     bool found = false;
 
     for (int i = 0; i < WORDDATA_CACHE_NUM; i++) {

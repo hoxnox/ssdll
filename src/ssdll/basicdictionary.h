@@ -41,7 +41,7 @@ public:
     void unload();
 
 private:
-    bool tryGetCached(uint32_t idxitemOffset, std::vector<char> &data);
+    bool tryGetCached(uint64_t idxitemOffset, std::vector<char> &data);
 
 protected:
     std::string m_SameTypeSequence;

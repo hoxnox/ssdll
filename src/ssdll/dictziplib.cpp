@@ -40,6 +40,12 @@
 
 #include <sys/stat.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+    // Copied from linux libc sys/stat.h:
+    #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+    #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
 #include "dictziplib.hpp"
 
 #define USE_CACHE 1
@@ -119,10 +125,15 @@ int DictData::read_header(const std::string &fname, bool computeCRC) {
 #endif
 	FILE          *str;
 	int           id1, id2, si1, si2;
-	char          buffer[BUFFERSIZE];
+#ifdef _WIN32
+    wchar_t          buffer[BUFFERSIZE];
+    wchar_t          *pt;
+#else
+    char          buffer[BUFFERSIZE];
+    char          *pt;
+#endif
 	int           extraLength, subLength;
-	int           i;
-	char          *pt;
+    int           i;
 	int           c;
 	struct stat   sb;
 	unsigned long crc   = crc32( 0L, Z_NULL, 0 );
@@ -227,7 +238,11 @@ int DictData::read_header(const std::string &fname, bool computeCRC) {
 		this->origFilename = buffer;
 		this->headerLength += this->origFilename.length() + 1;
 	} else {
-		this->origFilename = "";
+#ifdef _WIN32
+        this->origFilename = L"";
+#else
+        this->origFilename = "";
+#endif
 	}
 
    if (this->flags & GZ_COMMENT) { /* FIXME! Add checking for header len */
@@ -238,7 +253,11 @@ int DictData::read_header(const std::string &fname, bool computeCRC) {
       comment = buffer;
       headerLength += comment.length()+1;
    } else {
+#ifdef _WIN32
+      comment = L"";
+#else
       comment = "";
+#endif
    }
 
    if (this->flags & GZ_FHCRC) {
@@ -315,7 +334,11 @@ bool DictData::open(const std::string& fname, bool computeCRC) {
 		return false;
    }
 
-   if (fstat(fd, &sb)) {
+#ifdef _WIN32
+   if (_fstat64(fd, &sb)) {
+#else
+    if (fstat(fd, &sb)) {
+#endif
 		 //err_fatal_errno( __FUNCTION__,
 		 //       "Cannot stat data file \"%s\"\n", fname );
 		 return false;

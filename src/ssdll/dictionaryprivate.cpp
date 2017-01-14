@@ -111,7 +111,7 @@ std::string simplifyMarkup(const std::vector<char> &xdxfLikeData) {
                 result.push_back('}');
             }
 
-            else if ((tag == "ex") || (tag == "\ex")) {
+            else if ((tag == "ex") || (tag == "/ex")) {
                 result.push_back('\\');
             }
 
