@@ -4,11 +4,6 @@
 TranslatorDemo::TranslatorDemo(QObject *parent) :
     QObject(parent)
 {
-    m_SocketNotifier = new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this);
-}
-
-void TranslatorDemo::connectEntities() {
-    QObject::connect(m_SocketNotifier, SIGNAL(activated(int)), this, SLOT(readWord()));
 }
 
 bool TranslatorDemo::loadDict(const QString &ifoFilepath) {
@@ -21,20 +16,13 @@ bool TranslatorDemo::loadDict(const QString &ifoFilepath) {
     return result;
 }
 
-void TranslatorDemo::readWord() {
-    std::string line;
-    std::getline(std::cin, line);
+void TranslatorDemo::process(const QString &line) {
+    std::string translation;
+    std::string word = line.toStdString();
 
-    if (std::cin.eof() || (line == "quit") || (line == "exit")) {
-        emit quit();
+    if (m_LookupDictionary.translate(word, translation)) {
+        std::cout << translation << std::endl;
     } else {
-        std::string translation;
-        if (m_LookupDictionary.translate(line, translation)) {
-            std::cout << translation << std::endl;
-        } else {
-            std::cout << "Not found";
-        }
-
-        std::cout << std::endl << "> " << std::flush;
+        std::cout << "Not found";
     }
 }

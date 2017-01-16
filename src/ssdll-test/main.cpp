@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QStringList>
+#include <QTextStream>
 #include "translatordemo.h"
 #include <iostream>
 
@@ -17,11 +18,18 @@ int main(int argc, char *argv[]) {
     if (!demo.loadDict(ifoFilepath)) {
         std::cout << "Can't load dictionary" << std::endl;
         return 2;
+    } else {
+        std::cout << "Dictionary loaded" << std::endl;
     }
 
-    demo.connectEntities();
-    QObject::connect(&demo, SIGNAL(quit()), &app, SLOT(quit()));
+    QString nextLine;
+    QTextStream qtin(stdin);
 
-    std::cout << "Ready!" << std::endl << "> " << std::flush;
-    return app.exec();
+    while (true) {
+        std::cout << "> " << std::flush;
+        QString line = qtin.readLine();
+        demo.process(line);
+    }
+
+    return 0;
 }
