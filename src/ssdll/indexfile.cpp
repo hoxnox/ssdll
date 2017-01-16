@@ -256,7 +256,7 @@ char *OrdinaryIndexFile::readFirstKeyOnPage(int pageIndex) {
     fseek(m_IndexFile, m_WordOffset[pageIndex], SEEK_SET);
 #endif
     uint64_t pageSize = m_WordOffset[pageIndex + 1] - m_WordOffset[pageIndex];
-    const size_t bytesToRead = std::min(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));
+    const size_t bytesToRead = std::min<size_t>(sizeof(m_WordEntryBuffer), static_cast<size_t>(pageSize));
     const size_t nitems = fread(m_WordEntryBuffer, bytesToRead, 1, m_IndexFile);
     assert(nitems == 1);
     // TODO: check returned values, deal with word entry that strlen>255.

@@ -149,7 +149,7 @@ bool WordData::parseWithoutSameTypeSequence(const std::vector<char> &data) {
                 size_t blockStart = pos + 1 + sizeof(uint32_t);
                 size_t blockEnd = blockStart + blockSize - 1;
                 assert(blockEnd <= posMax);
-                blockEnd = std::min(blockEnd, posMax);
+                blockEnd = std::min<size_t>(blockEnd, posMax);
 
                 if (addDataChunk(data, blockStart, blockEnd, c)) {
                     added = true;
