@@ -40,7 +40,7 @@ bool tryGetValue(const std::map<std::string, std::string> &keyValueStore, const 
 
 #ifdef _WIN32
 bool DictionaryMetadata::init(const std::wstring &ifoPath, bool isTreeDict) {
-    std::wifstream ifoStream(ifoPath.c_str());
+    std::ifstream ifoStream(ifoPath.c_str());
 #else
 bool DictionaryMetadata::init(const std::string &ifoPath, bool isTreeDict) {
     std::ifstream ifoStream(ifoPath.c_str());

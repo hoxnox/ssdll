@@ -41,6 +41,7 @@ win32 {
     INCLUDEPATH += ../zlib-1.2.8/
     LIBS += -lz
     LIBS += -lmman
+    LIBS += -lWs2_32
 }
 
 unix {
