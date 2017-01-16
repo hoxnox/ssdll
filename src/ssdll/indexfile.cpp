@@ -432,7 +432,7 @@ std::string CompressedIndexFile::retrieveKey(int index, uint64_t &offset, uint32
         offset = ntohll(get_uint64(p1));
         p1 += sizeof(uint64_t);
     } else {
-        offset = ntohll(get_uint32(p1));
+        offset = ntohl(get_uint32(p1));
         p1 += sizeof(uint32_t);
     }
 
