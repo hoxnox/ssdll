@@ -9,6 +9,11 @@
 * Update submodule with mman-win32 project and build `mman-win32/mman-win32.pro` file
 * Copy results (mman.lib, mman.dll) to the `libs/` directory
 
+##OS X
+##Linux
+
+Nothing specific
+
 ###ssdll
 
 * Open `ssdll/ssdll.pro` project and build it
