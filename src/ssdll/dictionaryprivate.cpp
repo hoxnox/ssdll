@@ -2,14 +2,6 @@
 #include <cassert>
 #include "utils.h"
 
-void replaceStringG(std::string& str, const std::string& replaceWhat, const std::string& replaceTo) {
-    size_t pos = 0;
-    while ((pos = str.find(replaceWhat, pos)) != std::string::npos) {
-         str.replace(pos, replaceWhat.length(), replaceTo);
-         pos += replaceTo.length();
-    }
-}
-
 bool startsWith(const std::vector<char> &data, size_t pos, const std::string &prefix) {
     bool anyError = false;
 
