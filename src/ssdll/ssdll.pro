@@ -46,6 +46,7 @@ win32 {
 
 appveyor {
     INCLUDEPATH += ../../../zlib-1.2.8/
+    LIBS += -L"$$PWD/../../../libs/"
 }
 
 unix {
