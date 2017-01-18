@@ -1,5 +1,6 @@
 #include "dictionaryprivate.h"
 #include <cassert>
+#include <cstring>
 #include "utils.h"
 
 bool startsWith(const std::vector<char> &data, size_t pos, const std::string &prefix) {

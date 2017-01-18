@@ -1,6 +1,7 @@
 #include "indexfile.h"
 #include <cstdio>
 #include <cassert>
+#include <cstring>
 #include <algorithm>
 #include <zlib.h>
 #include <fcntl.h>
@@ -10,6 +11,14 @@
 
 #ifdef _WIN32
 #include <WinSock2.h>
+#else
+#include <arpa/inet.h>
+
+// for ntohll
+#if defined(__linux__)
+#  include <endian.h>
+#  define ntohll(x) be64toh(x)
+#endif
 #endif
 
 static inline int stardict_strcmp(const char *s1, const char *s2) {
