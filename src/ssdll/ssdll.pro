@@ -44,6 +44,10 @@ win32 {
     LIBS += -lWs2_32
 }
 
+appveyor {
+    INCLUDEPATH += ../../../zlib-1.2.8/
+}
+
 unix {
     LIBS += -lz
 }
