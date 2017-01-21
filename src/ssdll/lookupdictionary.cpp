@@ -5,6 +5,9 @@ LookupDictionary::LookupDictionary() {
 }
 
 LookupDictionary::~LookupDictionary() {
+    if (m_DictionaryPrivate) {
+        m_DictionaryPrivate->unloadDictionary();
+    }
 }
 
 #ifdef _WIN32
@@ -16,12 +19,6 @@ bool LookupDictionary::loadDictionary(const std::string &ifoFilepath) {
 
     bool success = m_DictionaryPrivate->loadDictionary();
     return success;
-}
-
-void LookupDictionary::unloadDictionary() {
-    if (!m_DictionaryPrivate) { return; }
-
-    m_DictionaryPrivate->unloadDictionary();
 }
 
 bool LookupDictionary::translate(const std::string &word, std::string &translation) {

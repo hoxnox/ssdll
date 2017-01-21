@@ -163,11 +163,11 @@ bool DictionaryPrivate::loadDictionary() {
 }
 
 void DictionaryPrivate::unloadDictionary() {
-    m_IfoFilePath.clear();
+    // m_IfoFilePath.clear();
     m_DictMetadata.clear();
     m_IndexFile.reset();
     m_BasicDictionary.unload();
-    m_IsLoaded = true;
+    m_IsLoaded = false;
 }
 
 bool DictionaryPrivate::translate(const std::string &word, std::string &translation) {

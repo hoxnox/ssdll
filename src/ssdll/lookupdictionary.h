@@ -19,7 +19,6 @@ public:
 #else
     bool loadDictionary(const std::string &ifoFilepath);
 #endif
-    void unloadDictionary();
     bool translate(const std::string &word, std::string &translation);
 
 private:
