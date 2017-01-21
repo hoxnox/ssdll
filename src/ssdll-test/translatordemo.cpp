@@ -8,10 +8,14 @@ TranslatorDemo::TranslatorDemo(QObject *parent) :
 
 bool TranslatorDemo::loadDict(const QString &ifoFilepath) {
 #ifdef Q_OS_WIN
-    bool result = m_LookupDictionary.loadDictionary(ifoFilepath.toStdWString());
+    bool result = m_LookupDictionary.setIfoFilePath(ifoFilepath.toStdWString());
 #else
-    bool result = m_LookupDictionary.loadDictionary(ifoFilepath.toStdString());
+    bool result = m_LookupDictionary.setIfoFilePath(ifoFilepath.toStdString());
 #endif
+
+    if (result) {
+        result = m_LookupDictionary.loadDictionary();
+    }
 
     return result;
 }
