@@ -1,7 +1,9 @@
 #include "lookupdictionary.h"
 #include "dictionaryprivate.h"
 
-LookupDictionary::LookupDictionary() {
+LookupDictionary::LookupDictionary()
+{
+    m_DictionaryPrivate.reset(new DictionaryPrivate());
 }
 
 LookupDictionary::~LookupDictionary() {
@@ -11,12 +13,15 @@ LookupDictionary::~LookupDictionary() {
 }
 
 #ifdef _WIN32
-bool LookupDictionary::loadDictionary(const std::wstring &ifoFilepath) {
+bool LookupDictionary::setIfoFilePath(const std::wstring &ifoFilePath) {
 #else
-bool LookupDictionary::loadDictionary(const std::string &ifoFilepath) {
+bool LookupDictionary::setIfoFilePath(const std::string &ifoFilePath) {
 #endif
-    m_DictionaryPrivate.reset(new DictionaryPrivate(ifoFilepath));
+    bool success = m_DictionaryPrivate->setIfoPath(ifoFilePath);
+    return success;
+}
 
+bool LookupDictionary::loadDictionary() {
     bool success = m_DictionaryPrivate->loadDictionary();
     return success;
 }
@@ -26,4 +31,11 @@ bool LookupDictionary::translate(const std::string &word, std::string &translati
 
     bool success = m_DictionaryPrivate->translate(word, translation);
     return success;
+}
+
+bool LookupDictionary::isLoaded() const {
+    if (!m_DictionaryPrivate) { return false; }
+
+    bool result = m_DictionaryPrivate->isLoaded();
+    return result;
 }

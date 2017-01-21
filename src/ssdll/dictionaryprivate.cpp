@@ -126,17 +126,26 @@ std::string simplifyMarkup(const std::vector<char> &xdxfLikeData) {
     return strResult;
 }
 
-#ifdef _WIN32
-DictionaryPrivate::DictionaryPrivate(const std::wstring &ifoFilePath):
-#else
-DictionaryPrivate::DictionaryPrivate(const std::string &ifoFilePath):
-#endif
-    m_IfoFilePath(ifoFilePath),
+DictionaryPrivate::DictionaryPrivate():
     m_IsLoaded(false)
 {
 }
 
 DictionaryPrivate::~DictionaryPrivate() {
+    if (m_IsLoaded) {
+        unloadDictionary();
+    }
+}
+
+#ifdef _WIN32
+bool DictionaryPrivate::setIfoPath(const std::wstring &ifoFilePath) {
+#else
+bool DictionaryPrivate::setIfoPath(const std::string &ifoFilePath) {
+#endif
+    if (m_IsLoaded) { return false; }
+
+    m_IfoFilePath = ifoFilePath;
+    return true;
 }
 
 bool DictionaryPrivate::loadDictionary() {

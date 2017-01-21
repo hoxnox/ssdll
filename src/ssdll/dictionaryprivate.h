@@ -12,15 +12,18 @@
 class DictionaryPrivate
 {
 public:
-#ifdef _WIN32
-    DictionaryPrivate(const std::wstring &ifoFilePath);
-#else
-    DictionaryPrivate(const std::string &ifoFilePath);
-#endif
-
+    DictionaryPrivate();
     virtual ~DictionaryPrivate();
 
 public:
+    bool isLoaded() const { return m_IsLoaded; }
+
+public:
+#ifdef _WIN32
+    bool setIfoPath(const std::wstring &ifoFilePath);
+#else
+    bool setIfoPath(const std::string &ifoFilePath);
+#endif
     bool loadDictionary();
     void unloadDictionary();
     bool translate(const std::string &word, std::string &translation);

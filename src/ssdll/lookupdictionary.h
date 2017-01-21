@@ -15,11 +15,13 @@ public:
 
 public:
 #ifdef _WIN32
-    bool loadDictionary(const std::wstring &ifoFilepath);
+    bool setIfoFilePath(const std::wstring &ifoFilePath);
 #else
-    bool loadDictionary(const std::string &ifoFilepath);
+    bool setIfoFilePath(const std::string &ifoFilePath);
 #endif
+    bool loadDictionary();
     bool translate(const std::string &word, std::string &translation);
+    bool isLoaded() const;
 
 private:
     std::unique_ptr<DictionaryPrivate> m_DictionaryPrivate;
