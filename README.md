@@ -6,7 +6,7 @@ This is a **cross-platform** (Windows, OS X, Linux) library which is capable of 
 * **correct support of 64-bit offsets** in dictionaries for all supported platforms
 * **correct support of Unicode filepaths in Windows**
 * substitution of tons of direct pointer allocations/memory access with safer alternatives such as `std::vector` and `std::string`
-* the readability was enchanced dramatically in comparison to aforementioned projects (_this is a subjective opinion of course_) except of the original `dictziplib.cpp` which you better don't want to touch
+* the readability has been enchanced dramatically in comparison to aforementioned projects (_this is a subjective opinion of course_) except of the original `dictziplib.cpp` which you better don't want to touch
 
 Build instructions can be found in [BUILD.md](https://github.com/Ribtoks/ssdll/blob/master/BUILD.md) file.
 
