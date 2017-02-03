@@ -8,6 +8,18 @@
 #define TOUPPER(c) (ISLOWER (c) ? (c) - 'a' + 'A' : (c))
 #define TOLOWER(c) (ISUPPER (c) ? (c) - 'A' + 'a' : (c))
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#else
+#include <arpa/inet.h>
+
+// for ntohll
+#if defined(__linux__)
+#  include <endian.h>
+#  define ntohll(x) be64toh(x)
+#endif
+#endif
+
 typedef unsigned char guchar;
 
 uint32_t get_uint32(const char *addr) {
@@ -20,6 +32,14 @@ uint64_t get_uint64(const char *addr) {
     uint64_t result;
     result = *((uint64_t*)addr);
     return result;
+}
+
+uint32_t get_uint32_ntoh(const char *addr) {
+    return ntohl(get_uint32(addr));
+}
+
+uint64_t get_uint64_ntoh(const char *addr) {
+    return ntohll(get_uint64(addr));
 }
 
 bool ascii_isupper(char c) {

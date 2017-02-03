@@ -9,18 +9,6 @@
 #include "utils.h"
 #include "mapfile.hpp"
 
-#ifdef _WIN32
-#include <WinSock2.h>
-#else
-#include <arpa/inet.h>
-
-// for ntohll
-#if defined(__linux__)
-#  include <endian.h>
-#  define ntohll(x) be64toh(x)
-#endif
-#endif
-
 static inline int stardict_strcmp(const char *s1, const char *s2) {
     const int caseResult = ascii_strcasecmp(s1, s2);
     if (caseResult == 0) {
@@ -220,14 +208,14 @@ void OrdinaryIndexFile::CachedPage::parseIndexData(char *data, int nent, long in
         p += len + 1;
 
         if (is64Offset) {
-            m_Entries[i].m_Offset = ntohll(get_uint64(p));
+            m_Entries[i].m_Offset = get_uint64_ntoh(p);
             p += sizeof(uint64_t);
         } else {
-            m_Entries[i].m_Offset = ntohl(get_uint32(p));
+            m_Entries[i].m_Offset = get_uint32_ntoh(p);
             p += sizeof(uint32_t);
         }
 
-        m_Entries[i].m_Size = ntohl(get_uint32(p));
+        m_Entries[i].m_Size = get_uint32_ntoh(p);
         p += sizeof(uint32_t);
     }
 }
@@ -438,14 +426,14 @@ std::string CompressedIndexFile::retrieveKey(int index, uint64_t &offset, uint32
     const char *data = m_WordList[index];
     const char *p1 = data + strlen(data) + sizeof(char);
     if (m_Is64BitOffset) {
-        offset = ntohll(get_uint64(p1));
+        offset = get_uint64_ntoh(p1);
         p1 += sizeof(uint64_t);
     } else {
-        offset = ntohl(get_uint32(p1));
+        offset = get_uint32_ntoh(p1);
         p1 += sizeof(uint32_t);
     }
 
-    size = ntohl(get_uint32(p1));
+    size = get_uint32_ntoh(p1);
 
     return std::string(data);
 }
