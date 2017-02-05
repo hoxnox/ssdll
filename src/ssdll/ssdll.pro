@@ -37,10 +37,11 @@ HEADERS += lookupdictionary.h\
 INCLUDEPATH += ../
 
 win32 {
-    DEFINES += ZLIB_WINAPI
+    DEFINES += ZLIB_WINAPI \
+               ZLIB_DLL
     LIBS += -L"$$PWD/../libs/"
     INCLUDEPATH += ../zlib-1.2.11/
-    LIBS += -lzlibwapi
+    LIBS += -lz
     LIBS += -lmman
     LIBS += -lWs2_32
 }
