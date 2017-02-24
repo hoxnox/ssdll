@@ -4,6 +4,7 @@
 #include <ctime>
 #include <string>
 #include <zlib.h>
+#include <stdint.h>
 
 #include "mapfile.hpp"
 
