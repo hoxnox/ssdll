@@ -59,3 +59,10 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+linux-g++-64 {
+    LIBS += -lz
+    CONFIG += staticlib
+    target.path = "$$PWD/../../../libs/"
+
+}
