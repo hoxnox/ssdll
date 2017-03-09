@@ -4,7 +4,7 @@
 
 ###3rd-parties
 
-* Get zlib 1.2.8 source code (to `src/zlib-1.2.8/`) and build it using `zlib-project/zlib.pro` file
+* Get zlib 1.2.11 source code (to `src/zlib-1.2.11/`) and build it using `zlib-project/zlib.pro` file
 * Copy results (z.lib, z.dll) to the `libs/` directory
 * Update mman-win32 submodule and build `mman-win32/mman-win32.pro` file
 * Copy results (mman.lib, mman.dll) to the `libs/` directory
