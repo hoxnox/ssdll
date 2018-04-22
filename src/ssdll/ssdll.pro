@@ -36,17 +36,18 @@ HEADERS += lookupdictionary.h\
 
 INCLUDEPATH += ../
 
-# xpiks build
-CONFIG(debug, debug|release) {
-    DESTDIR = ../../../../libs/debug
-} else {
-    DESTDIR = ../../../../libs/release
-}
-
 win32 {
     DEFINES += ZLIB_WINAPI \
                ZLIB_DLL
     LIBS += -L"$$PWD/../libs/"
+
+    # xpiks build
+    CONFIG(debug, debug|release) {
+        DESTDIR = ../../../../libs/debug
+    } else {
+        DESTDIR = ../../../../libs/release
+    }
+
     INCLUDEPATH += ../zlib-1.2.11/
     LIBS += -lz
     LIBS += -lmman
