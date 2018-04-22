@@ -43,9 +43,9 @@ win32 {
 
     # xpiks build
     CONFIG(debug, debug|release) {
-        DESTDIR = ../../../../libs/debug
+        LIBS = ../../../../libs/debug
     } else {
-        DESTDIR = ../../../../libs/release
+        LIBS = ../../../../libs/release
     }
 
     INCLUDEPATH += ../zlib-1.2.11/
