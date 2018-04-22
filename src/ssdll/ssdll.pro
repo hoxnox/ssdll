@@ -43,9 +43,9 @@ win32 {
 
     # xpiks build
     CONFIG(debug, debug|release) {
-        LIBS = ../../../../libs/debug
+        LIBS += ../../../../libs/debug
     } else {
-        LIBS = ../../../../libs/release
+        LIBS += ../../../../libs/release
     }
 
     INCLUDEPATH += ../zlib-1.2.11/
