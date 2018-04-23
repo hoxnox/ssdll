@@ -49,13 +49,13 @@ win32 {
     }
 
     INCLUDEPATH += ../zlib-1.2.11/
+    INCLUDEPATH += ../../../zlib-1.2.11/
     LIBS += -lz
     LIBS += -lmman
     LIBS += -lWs2_32
 }
 
 appveyor {
-    INCLUDEPATH += ../../../zlib-1.2.11/
     LIBS += -L"$$PWD/../../../../libs/"
 }
 
