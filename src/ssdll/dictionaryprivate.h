@@ -1,6 +1,7 @@
 #ifndef DICTIONARYPRIVATE_H
 #define DICTIONARYPRIVATE_H
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <cstdio>
@@ -41,7 +42,7 @@ private:
     std::unique_ptr<IIndexFile> m_IndexFile;
     DictionaryMetadata m_DictMetadata;
     BasicDictionary m_BasicDictionary;
-    volatile bool m_IsLoaded;
+    std::atomic_bool m_IsLoaded;
 };
 
 #endif // DICTIONARYPRIVATE_H

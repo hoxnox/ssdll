@@ -126,9 +126,9 @@ std::string simplifyMarkup(const std::vector<char> &xdxfLikeData) {
     return strResult;
 }
 
-DictionaryPrivate::DictionaryPrivate():
-    m_IsLoaded(false)
+DictionaryPrivate::DictionaryPrivate()
 {
+    m_IsLoaded = true;
 }
 
 DictionaryPrivate::~DictionaryPrivate() {
@@ -234,7 +234,7 @@ bool DictionaryPrivate::readIndex() {
 
         unsigned long long fileSize;
         if (fileExists(idxFilePath, fileSize)) {
-            m_IndexFile.reset(new CompressedIndexFile());
+            m_IndexFile = std::make_unique<CompressedIndexFile>();
         } else {
             idxFilePath.erase(idxFilePath.length() - sizeof(".gz") + 1, sizeof(".gz") - 1);
 
@@ -242,7 +242,7 @@ bool DictionaryPrivate::readIndex() {
                 break;
             }
 
-            m_IndexFile.reset(new OrdinaryIndexFile());
+            m_IndexFile = std::make_unique<OrdinaryIndexFile>();
             assert(fileSize == m_DictMetadata.getIndexFileSize());
         }
 

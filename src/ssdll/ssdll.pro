@@ -6,12 +6,16 @@
 
 TARGET = ssdll
 TEMPLATE = lib
-CONFIG += c++11
+CONFIG += c++14
 CONFIG -= app_bundle
 CONFIG -= qt
 
 DEFINES += SSDLL_LIBRARY
 DEFINES += "_FILE_OFFSET_BITS=64"
+
+!win32 {
+    QMAKE_CXXFLAGS += -std=c++14
+}
 
 SOURCES += lookupdictionary.cpp \
     dictionarymetadata.cpp \

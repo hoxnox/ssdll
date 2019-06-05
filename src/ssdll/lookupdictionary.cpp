@@ -3,11 +3,11 @@
 
 LookupDictionary::LookupDictionary()
 {
-    m_DictionaryPrivate.reset(new DictionaryPrivate());
+    m_DictionaryPrivate = std::make_unique<DictionaryPrivate>();
 }
 
 LookupDictionary::~LookupDictionary() {
-    if (m_DictionaryPrivate) {
+    if (m_DictionaryPrivate != nullptr) {
         m_DictionaryPrivate->unloadDictionary();
     }
 }
