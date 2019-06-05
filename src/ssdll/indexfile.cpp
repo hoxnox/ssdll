@@ -1,13 +1,18 @@
 #include "indexfile.h"
+
 #include <cstdio>
 #include <cassert>
 #include <cstring>
 #include <algorithm>
+
 #include <zlib.h>
+
 #include <fcntl.h>
 #include <sys/stat.h>
+
 #include "utils.h"
 #include "mapfile.hpp"
+#include "logger.h"
 
 static inline int stardict_strcmp(const char *s1, const char *s2) {
     const int caseResult = ascii_strcasecmp(s1, s2);
@@ -29,7 +34,9 @@ OrdinaryIndexFile::OrdinaryIndexFile():
 }
 
 OrdinaryIndexFile::~OrdinaryIndexFile() {
+    LOG << "OrdinaryIndexFile::~OrdinaryIndexFile - #";
     if (m_IndexFile != nullptr) {
+        LOG << "OrdinaryIndexFile::~OrdinaryIndexFile - Closing index file";
         fclose(m_IndexFile);
     }
 }
@@ -155,6 +162,7 @@ bool OrdinaryIndexFile::loadCache(const std::string &idxfilepath) {
 
         MapFile mf;
         if (!mf.open(cachePath, sb.st_size)) {
+            LOG << "OrdinaryIndexFile::loadCache - failed to open" << cachePath;
             break;
         }
 
@@ -180,7 +188,11 @@ void OrdinaryIndexFile::saveCache(const std::string &idxfilepath) {
     std::string cacheFilepath = idxfilepath + ".oft";
     FILE *out = fopen(cacheFilepath.c_str(), "wb");
 #endif
-    if (!out) { return; }
+    LOG << "OrdinaryIndexFile::saveCache - #";
+    if (!out) {
+        LOG << "OrdinaryIndexFile::saveCache - failed to open" << cacheFilepath;
+        return;
+    }
 
     do {
         auto cacheMagicLength = strlen(CACHE_MAGIC);
@@ -375,6 +387,7 @@ bool CompressedIndexFile::load(const std::string &filepath, bool is64bitOffset, 
 
     gzFile in = gzdopen(idxFile, "rb");
     if (in == nullptr) {
+        LOG << "CompressedIndexFile::load - Failed to gzdopen" << filepath;
         return false;
     }
 
@@ -382,9 +395,12 @@ bool CompressedIndexFile::load(const std::string &filepath, bool is64bitOffset, 
     m_IdxDataBuffer.resize(fileSize);
 
     const int len = gzread(in, &m_IdxDataBuffer[0], fileSize);
+    // also closes idxFile descriptor
     gzclose(in);
 
     if ((len < 0) || (size_t(len) != fileSize)) {
+        LOG << "CompressedIndexFile::load - file size mismatch: gz length:" << std::to_string(len) <<
+               "filesize:" << std::to_string(fileSize);
         return false;
     }
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <functional>
 #include "ssdll_global.h"
 
 class DictionaryPrivate;
@@ -19,6 +20,7 @@ public:
 #else
     bool setIfoFilePath(const std::string &ifoFilePath);
 #endif
+    void setLogger(const std::function<void(const std::string&)> &logger);
     bool loadDictionary();
     bool translate(const std::string &word, std::string &translation);
     bool isLoaded() const;

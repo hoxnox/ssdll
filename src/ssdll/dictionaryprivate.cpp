@@ -1,6 +1,8 @@
 #include "dictionaryprivate.h"
 #include <cassert>
 #include <cstring>
+
+#include "logger.h"
 #include "utils.h"
 
 bool startsWith(const std::vector<char> &data, size_t pos, const std::string &prefix) {
@@ -132,6 +134,7 @@ DictionaryPrivate::DictionaryPrivate()
 }
 
 DictionaryPrivate::~DictionaryPrivate() {
+    LOG << "DictionaryPrivate::~DictionaryPrivate - isLoaded:" << (m_IsLoaded ? "true" : "false");
     if (m_IsLoaded) {
         unloadDictionary();
     }
@@ -144,24 +147,29 @@ bool DictionaryPrivate::setIfoPath(const std::string &ifoFilePath) {
 #endif
     if (m_IsLoaded) { return false; }
 
+    LOG << "DictionaryPrivate::setIfoPath - " << ifoFilePath;
     m_IfoFilePath = ifoFilePath;
     return true;
 }
 
 bool DictionaryPrivate::loadDictionary() {
+    LOG << "DictionaryPrivate::loadDictionary - #";
     if (m_IsLoaded) { return false; }
 
     do {
         // TODO: tree dictionaries are not supported atm
         if (!m_DictMetadata.init(m_IfoFilePath, false)) {
+            LOG << "DictionaryPrivate::loadDictionary - failed to init dictionary metadata for" << m_IfoFilePath;
             break;
         }
 
         if (!readDictionary()) {
+            LOG << "DictionaryPrivate::loadDictionary - failed to read the dictionary for" << m_IfoFilePath;
             break;
         }
 
         if (!readIndex()) {
+            LOG << "DictionaryPrivate::loadDictionary - failed to read the index for" << m_IfoFilePath;
             break;
         }
 
@@ -172,6 +180,7 @@ bool DictionaryPrivate::loadDictionary() {
 }
 
 void DictionaryPrivate::unloadDictionary() {
+    LOG << "DictionaryPrivate::unloadDictionary - #";
     // m_IfoFilePath.clear();
     m_DictMetadata.clear();
     m_IndexFile.reset();
@@ -180,6 +189,7 @@ void DictionaryPrivate::unloadDictionary() {
 }
 
 bool DictionaryPrivate::translate(const std::string &word, std::string &translation) {
+    LOG << "DictionaryPrivate::translate -" << word;
     if (!m_IsLoaded) { return false; }
     bool result = false;
 
@@ -211,17 +221,21 @@ bool DictionaryPrivate::translate(const std::string &word, std::string &translat
                 result = true;
             }
         }
+    } else {
+        LOG << "DictionaryPrivate::translate - Cannot find word bounds" << word;
     }
 
     return result;
 }
 
 bool DictionaryPrivate::readDictionary() {
+    LOG << "DictionaryPrivate::readDictionary - #";
     bool result = m_BasicDictionary.readDictionary(m_IfoFilePath);
     return result;
 }
 
 bool DictionaryPrivate::readIndex() {
+    LOG << "DictionaryPrivate::readIndex - #";
     bool result = false;
     do {
 #ifdef _WIN32
@@ -234,14 +248,17 @@ bool DictionaryPrivate::readIndex() {
 
         unsigned long long fileSize;
         if (fileExists(idxFilePath, fileSize)) {
+            LOG << "DictionaryPrivate::readIndex - using idx.dz file" << idxFilePath;
             m_IndexFile = std::make_unique<CompressedIndexFile>();
         } else {
             idxFilePath.erase(idxFilePath.length() - sizeof(".gz") + 1, sizeof(".gz") - 1);
 
             if (!fileExists(idxFilePath, fileSize)) {
+                LOG << "DictionaryPrivate::readIndex - File" << idxFilePath << "does not exist";
                 break;
             }
 
+            LOG << "DictionaryPrivate::readIndex - using ordinary file" << idxFilePath;
             m_IndexFile = std::make_unique<OrdinaryIndexFile>();
             assert(fileSize == m_DictMetadata.getIndexFileSize());
         }
@@ -250,6 +267,7 @@ bool DictionaryPrivate::readIndex() {
                                m_DictMetadata.isOffset64Bit(),
                                m_DictMetadata.getWordCount(),
                                fileSize)) {
+            LOG << "Failed to load index" << idxFilePath;
             break;
         }
 

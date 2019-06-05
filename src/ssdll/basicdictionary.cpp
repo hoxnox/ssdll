@@ -1,7 +1,14 @@
 #include "basicdictionary.h"
 #include <cassert>
 #include <cstring>
+
 #include "utils.h"
+#include "logger.h"
+
+BasicDictionary::~BasicDictionary() {
+    LOG << "BasicDictionary::~BasicDictionary - #";
+    unload();
+}
 
 void BasicDictionary::readWordData(uint64_t idxitemOffset, uint32_t idxitemSize, std::vector<char> &wordData) {
     if (tryGetCached(idxitemOffset, wordData)) {
@@ -43,10 +50,12 @@ bool BasicDictionary::readDictionary(const std::string &ifoFilepath) {
     std::string dictFilePath(ifoFilepath);
     dictFilePath.replace(dictFilePath.length() - sizeof("ifo") + 1, sizeof("ifo") - 1, "dict.dz");
 #endif
+    LOG << "BasicDictionary::readDictionary -" << ifoFilepath;
     do {
         if (fileExists(dictFilePath)) {
-            m_DictDzFile.reset(new DictData());
+            m_DictDzFile = std::make_unique<DictData>();
             if (!m_DictDzFile->open(dictFilePath, false)) {
+                LOG << "BasicDictionary::readDictionary - failed to open as .DICT.DZ" << dictFilePath;
                 break;
             }
         } else {
@@ -56,6 +65,7 @@ bool BasicDictionary::readDictionary(const std::string &ifoFilepath) {
             m_DictFile = fopen(dictFilePath.c_str(), "rb");
 #endif
             if (!m_DictFile) {
+                LOG << "BasicDictionary::readDictionary - failed to open" << dictFilePath;
                 break;
             }
         }
@@ -67,7 +77,9 @@ bool BasicDictionary::readDictionary(const std::string &ifoFilepath) {
 }
 
 void BasicDictionary::unload() {
+    LOG << "BasicDictionary::unload - #";
     if (m_DictFile != nullptr) {
+        LOG << "BasicDictionary::unload - closing dict file";
         fclose(m_DictFile);
         m_DictFile = nullptr;
     }

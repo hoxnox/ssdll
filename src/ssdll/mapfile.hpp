@@ -24,6 +24,7 @@ public:
     char *begin() { return m_Data; }
 
 private:
+    std::string m_Filepath;
     char *m_Data;
     size_t m_Size;
     int m_mmap_fd;

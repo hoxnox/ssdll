@@ -47,6 +47,7 @@
 #endif
 
 #include "dictziplib.hpp"
+#include "logger.h"
 
 #define USE_CACHE 1
 
@@ -297,11 +298,18 @@ int DictData::read_header(const std::string &fname, bool computeCRC) {
    return 0;
 }
 
+DictData::~DictData() {
+    LOG << "DictData::~DictData - #";
+    close();
+}
+
 #ifdef _WIN32
 bool DictData::open(const std::wstring& fname, bool computeCRC) {
     struct _stati64 sb;
 #else
+
 bool DictData::open(const std::string& fname, bool computeCRC) {
+    LOG << "DictData::open -" << fname;
     struct stat sb;
 #endif
 	int fd;
@@ -348,6 +356,7 @@ bool DictData::open(const std::string& fname, bool computeCRC) {
    ::close(fd);
 
    if (!mapfile.open(fname, size)) {
+       LOG << "DictData::open - failed to memory map file" << fname;
        return false;
    }
 
@@ -365,6 +374,7 @@ bool DictData::open(const std::string& fname, bool computeCRC) {
 }
 
 void DictData::close() {
+    LOG << "DictData::close - #";
     if (this->chunks) {
 		free(this->chunks);
     }
@@ -411,16 +421,19 @@ void DictData::read(char *buffer, uint64_t start, uint64_t size) {
 
 	switch (this->type) {
 	case DICT_GZIP:
+            LOG << "DictData::read - Cannot seek on pure gzip format files";
 		//err_fatal( __FUNCTION__,
 		// "Cannot seek on pure gzip format files.\n"
 		// "Use plain text (for performance)"
 		// " or dzip format (for space savings).\n" );
 		break;
 	case DICT_TEXT:
+            LOG << "DictData::read reading plain text";
 		memcpy( buffer, this->start + start, size );
 		//buffer[size] = '\0';
 		break;
 	case DICT_DZIP:
+            LOG << "DictData::read reading DZIP";
 		if (!this->initialized) {
 			++this->initialized;
 			this->zStream.zalloc    = nullptr;
@@ -526,6 +539,7 @@ void DictData::read(char *buffer, uint64_t start, uint64_t size) {
 		//*pt = '\0';
 		break;
 	case DICT_UNKNOWN:
+            LOG << "DictData::read - Unknown file type";
 		//err_fatal( __FUNCTION__, "Cannot read unknown file type\n" );
 		break;
 	}

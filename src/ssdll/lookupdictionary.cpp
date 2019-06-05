@@ -1,5 +1,6 @@
 #include "lookupdictionary.h"
 #include "dictionaryprivate.h"
+#include "logger.h"
 
 LookupDictionary::LookupDictionary()
 {
@@ -19,6 +20,10 @@ bool LookupDictionary::setIfoFilePath(const std::string &ifoFilePath) {
 #endif
     bool success = m_DictionaryPrivate->setIfoPath(ifoFilePath);
     return success;
+}
+
+void LookupDictionary::setLogger(const std::function<void(const std::string&)> &logger) {
+    ssdll::Logger::s_Callback = logger;
 }
 
 bool LookupDictionary::loadDictionary() {

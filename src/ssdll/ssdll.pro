@@ -25,7 +25,8 @@ SOURCES += lookupdictionary.cpp \
     indexfile.cpp \
     mapfile.cpp \
     basicdictionary.cpp \
-    dictionaryprivate.cpp
+    dictionaryprivate.cpp \
+    logger.cpp
 
 HEADERS += lookupdictionary.h\
         ssdll_global.h \
@@ -36,7 +37,8 @@ HEADERS += lookupdictionary.h\
     worddata.h \
     indexfile.h \
     basicdictionary.h \
-    dictionaryprivate.h
+    dictionaryprivate.h \
+    logger.h
 
 INCLUDEPATH += ../
 

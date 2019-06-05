@@ -20,7 +20,7 @@ public:
     static const size_t DICT_CACHE_SIZE = 5;
 
 	DictData() {}
-	~DictData() { close(); }
+    ~DictData();
 
 public:
 #ifdef _WIN32

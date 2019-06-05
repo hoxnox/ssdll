@@ -22,11 +22,7 @@ public:
         m_CurrCacheIndex(0)
     { }
 
-    virtual ~BasicDictionary() {
-        if (m_DictFile) {
-            fclose(m_DictFile);
-        }
-    }
+    virtual ~BasicDictionary();
 
     BasicDictionary(const BasicDictionary&) = delete;
     BasicDictionary &operator=(const BasicDictionary&) = delete;
