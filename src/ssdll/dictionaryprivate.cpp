@@ -128,7 +128,7 @@ std::string simplifyMarkup(const std::vector<char> &xdxfLikeData) {
 
 DictionaryPrivate::DictionaryPrivate()
 {
-    m_IsLoaded = true;
+    m_IsLoaded = false;
 }
 
 DictionaryPrivate::~DictionaryPrivate() {
