@@ -13,10 +13,8 @@ namespace ssdll {
 
         ~Logger();
 
-        Logger &operator<<(const std::string &s) {
-            m_LogLines.push_back(s);
-            return *this;
-        }
+        Logger &operator<<(const std::string &s);
+        Logger &operator<<(const std::wstring &s);
 
         static std::function<void(const std::string&)> s_Callback;
 
