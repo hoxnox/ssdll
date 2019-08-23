@@ -12,7 +12,15 @@
 ## OS X
 ## Linux
 
-Nothing specific
+Building with conan and cmake:
+
+```
+mkdir build && cd build
+conan remote add hoxnox https://api.bintray.com/conan/hoxnox/conan
+conan install --build=missing ..
+cmake ..
+make
+```
 
 ### ssdll
 
@@ -20,3 +28,4 @@ Nothing specific
 * [optional] Copy results (ssdll.lib, ssdll.dll) to the `libs/` directory
 
 Last step is optional and should be done only in a case you want to try the library using `ssdll-test` project. This project builds to an executable which accepts path to .ifo file as 1st argument and then loads it and translates user input.
+

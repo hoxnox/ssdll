@@ -1,0 +1,5 @@
+[requires]
+zlib/1.2.11@hoxnox/stable
+
+[generators]
+cmake
