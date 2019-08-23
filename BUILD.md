@@ -16,7 +16,6 @@ Building with conan and cmake:
 
 ```
 mkdir build && cd build
-conan remote add hoxnox https://api.bintray.com/conan/hoxnox/conan
 conan install --build=missing ..
 cmake ..
 make
