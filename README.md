@@ -12,18 +12,36 @@ Build instructions can be found in [BUILD.md](https://github.com/Ribtoks/ssdll/b
 
 ## Usage
 
+    ```c++
+    #include <iostream>
     #include <lookupdictionary.h>
-    
-    LookupDictionary lookupDictionary;
-    
-    if (lookupDictionary.loadDictionary(ifoFilepath)) {
-        std::string translation;
-        
-        if (lookupDictionary.translate(word, translation)) {
-            std::cout << translation << std::endl;
-        }
-    }
 
+    int
+    main(int argc, char* argv[])
+    {
+        if (argc < 3)
+        {
+            std::cout << "Usage: " << argv[0] << " <ifo-file> <word>" << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        LookupDictionary dic;
+        dic.setLogger([](const std::string& msg) { std::cerr << "E: " << msg << std::endl; });
+
+        if (!dic.setIfoFilePath(argv[1]))
+            return EXIT_FAILURE;
+
+        if (!dic.loadDictionary())
+            return EXIT_FAILURE;
+
+        std::string translation;
+        if (!dic.translate(argv[2], translation))
+            return EXIT_FAILURE;
+
+        std::cout << translation << std::endl;
+        return EXIT_SUCCESS;
+    }
+    ```
 
 ## How to contribute:
 
